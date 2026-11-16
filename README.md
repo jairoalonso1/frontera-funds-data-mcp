@@ -32,12 +32,13 @@ El dominio se podrá migrar en una fase posterior, con aliases y clientes coordi
 
 Los esquemas y descripciones publicados por `tools/list` son el contrato vigente de cada herramienta.
 
-## Fuentes y autenticación actual
+## Fuentes y autenticación
 
 - Los datos provienen directamente de Socrata/datos.gov.co; el servidor no depende de Frontera Funds SaaS.
-- `x-socrata-app-token` / `app_token` es una credencial BYOK del proveedor Socrata, no una identidad de usuario Frontera.
-- El código admite `MCP_API_KEY` como protección opcional. Si no está configurada, el endpoint MCP queda público. En la configuración actual de Vercel no hay variables de entorno configuradas para este proyecto, por lo que no debe asumirse que el endpoint está protegido por API key.
-- La autenticación OAuth 2.1 y cuotas por usuario se documentan como siguiente fase en `docs/AUTHENTICATION_DECISION.md`; todavía no están implementadas en este servidor.
+- El endpoint MCP requiere OAuth 2.1 con Supabase Auth, con magic link por correo y consentimiento explícito del cliente.
+- El control de consumo reutiliza la cuota compartida de Frontera: 2.000 llamadas/mes y 50/minuto por usuario.
+- `x-socrata-app-token` es una credencial BYOK opcional del proveedor Socrata; no identifica al usuario ni reemplaza OAuth.
+- La metadata OAuth del recurso está disponible en `/api/mcp/oauth-protected-resource`.
 
 ## Desarrollo
 
@@ -61,3 +62,9 @@ npm start
 ```
 
 El nombre del repositorio y del servidor es `frontera-funds-data-mcp`. El dominio Vercel se conserva temporalmente para mantener compatibilidad con clientes existentes.
+
+## Autenticación y consumo
+
+El endpoint requiere OAuth 2.1 con Supabase Auth, siguiendo el modelo de Frontera Open Data. El usuario inicia sesión por magic link y autoriza explícitamente el cliente MCP. Las cuotas son compartidas entre los MCP del mismo proyecto Supabase: 2.000 llamadas/mes y 50/minuto por usuario. Solo se cuentan operaciones `tools/call`.
+
+Consulta [`docs/AUTHENTICATION.md`](docs/AUTHENTICATION.md) para el flujo, endpoints, variables y límites. La credencial BYOK de Socrata es independiente de la identidad OAuth.
