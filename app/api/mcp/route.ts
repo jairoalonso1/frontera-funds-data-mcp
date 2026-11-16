@@ -29,6 +29,12 @@ const CORS_HEADERS: Record<string, string> = {
   "Access-Control-Expose-Headers": "MCP-Protocol-Version, mcp-session-id, Mcp-Session-Id, WWW-Authenticate, Retry-After, X-MCP-Quota-Status"
 };
 
+function withCors(response: Response): Response {
+  const headers = new Headers(response.headers);
+  for (const [key, value] of Object.entries(CORS_HEADERS)) headers.set(key, value);
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
+
 function extractUserSocrataToken(req: Request): string | null {
   const headerToken =
     req.headers.get("x-socrata-app-token") || req.headers.get("x-app-token");
@@ -364,7 +370,6 @@ async function handleGET(req: Request) {
       tools: MCP_TOOLS.map((t) => ({ name: t.name, description: t.description })),
       usage: {
         mcp_endpoint: `${requestUrl.origin}/api/mcp`,
-        byok_header_optional: "x-socrata-app-token: <TU_APP_TOKEN_DATOS_GOV_CO>",
         byok_header_optional: "x-socrata-app-token: <TU_APP_TOKEN_DATOS_GOV_CO>"
       }
     },
