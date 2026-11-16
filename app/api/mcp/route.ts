@@ -1,4 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import { pipeline } from "@supabase/middleware";
+import { fromSupabaseUrl, withOAuthProtectedResource, withSupabase } from "@supabase/server";
+import { extractToolCalls } from "@/lib/mcp-quota";
 import { MCP_TOOLS, executeMcpTool } from "@/lib/mcp-tools";
 import {
   DATASET_ID,
@@ -9,42 +12,96 @@ import {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://laankpkyvzeierrnktte.supabase.co";
+const supabasePublishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
+const supabaseJwksUrl = new URL(`${supabaseUrl}/auth/v1/.well-known/jwks.json`);
+const QUOTA_SOURCE_ID = "frontera_funds";
 
 const SERVER_INFO = {
   name: "frontera-funds-data-mcp",
-  version: "1.0.0"
+  version: "1.1.0"
 };
 
 const CORS_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
   "Access-Control-Allow-Headers":
-    "Content-Type, Authorization, x-socrata-app-token, X-App-Token, mcp-session-id, Mcp-Session-Id, Accept, Last-Event-ID",
-  "Access-Control-Expose-Headers": "mcp-session-id, Mcp-Session-Id"
+    "Content-Type, Authorization, MCP-Protocol-Version, x-socrata-app-token, X-App-Token, mcp-session-id, Mcp-Session-Id, Accept, Last-Event-ID",
+  "Access-Control-Expose-Headers": "MCP-Protocol-Version, mcp-session-id, Mcp-Session-Id, WWW-Authenticate, Retry-After, X-MCP-Quota-Status"
 };
 
-function extractUserSocrataToken(req: NextRequest): string | null {
+function withCors(response: Response): Response {
+  const headers = new Headers(response.headers);
+  for (const [key, value] of Object.entries(CORS_HEADERS)) headers.set(key, value);
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
+
+function extractUserSocrataToken(req: Request): string | null {
   const headerToken =
     req.headers.get("x-socrata-app-token") || req.headers.get("x-app-token");
   if (headerToken) return headerToken;
 
   const queryToken =
-    req.nextUrl.searchParams.get("app_token") ||
-    req.nextUrl.searchParams.get("socrata_token");
+    new URL(req.url).searchParams.get("app_token") ||
+    new URL(req.url).searchParams.get("socrata_token");
   if (queryToken) return queryToken;
 
   return null;
 }
 
-function checkMcpAuth(req: NextRequest): boolean {
-  const requiredKey = process.env.MCP_API_KEY;
-  if (!requiredKey || requiredKey.trim() === "") return true;
-
-  const authHeader = req.headers.get("authorization") || "";
-  const bearer = authHeader.replace(/^Bearer\s+/i, "").trim();
-  const queryKey = req.nextUrl.searchParams.get("api_key") || "";
-
-  return bearer === requiredKey.trim() || queryKey === requiredKey.trim();
+function extractIdentityFromVerifiedBearer(authorization: string | null): string | null {
+  if (!authorization?.startsWith("Bearer ")) return null;
+  const token = authorization.slice("Bearer ".length).trim();
+  const parts = token.split(".");
+  if (parts.length !== 3) return null;
+  try {
+    const payload = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf-8")) as { sub?: string };
+    return typeof payload.sub === "string" && payload.sub.length > 0 ? payload.sub : null;
+  } catch { return null; }
+}
+function getNextMonthResetDateUTC(): string {
+  const now = new Date();
+  const nextMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+  return nextMonth.toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+}
+async function enforceToolQuota(request: Request): Promise<Response | null> {
+  if (request.method !== "POST") return null;
+  let body: unknown;
+  try { body = await request.clone().json(); } catch { return null; }
+  const { calls, firstToolName, rpcId } = extractToolCalls(body);
+  if (calls === 0) return null;
+  if (calls > 100) return Response.json({ jsonrpc: "2.0", id: rpcId, error: { code: -32600, message: "El lote supera el máximo de 100 llamadas de herramientas." } }, { status: 400 });
+  const authorization = request.headers.get("authorization");
+  const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!authorization?.startsWith("Bearer ") || !publishableKey || !serviceRoleKey) {
+    console.error("MCP authentication or quota configuration is incomplete.");
+    return Response.json({ error: "MCP authentication or quota service is unavailable." }, { status: 503 });
+  }
+  let userId = extractIdentityFromVerifiedBearer(authorization);
+  if (!userId) {
+    const userResponse = await fetch(`${supabaseUrl}/auth/v1/user`, { headers: { apikey: publishableKey, Authorization: authorization }, cache: "no-store" });
+    if (!userResponse.ok) return Response.json({ error: "Unauthorized" }, { status: 401 });
+    const user = await userResponse.json() as { id?: string };
+    userId = user.id ?? null;
+  }
+  if (!userId) return Response.json({ error: "Unauthorized" }, { status: 401 });
+  const quotaResponse = await fetch(`${supabaseUrl}/rest/v1/rpc/consume_mcp_quota`, {
+    method: "POST",
+    headers: { apikey: serviceRoleKey, Authorization: `Bearer ${serviceRoleKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ p_user_id: userId, p_calls: calls, p_monthly_limit: 2000, p_per_minute_limit: 50, p_source_id: QUOTA_SOURCE_ID, p_tool_name: firstToolName }),
+    cache: "no-store"
+  });
+  if (!quotaResponse.ok) { console.error("MCP quota check failed", quotaResponse.status); return Response.json({ error: "MCP quota service is temporarily unavailable." }, { status: 503 }); }
+  const quota = await quotaResponse.json() as { allowed?: boolean; reason?: "monthly" | "per_minute"; retry_after?: number };
+  if (quota.allowed) return null;
+  const retryAfter = Math.max(1, Math.ceil(quota.retry_after ?? 60));
+  const resetDate = getNextMonthResetDateUTC();
+  const message = quota.reason === "monthly"
+    ? `[FRONTERA FUNDS DATA MCP: CUOTA MENSUAL ALCANZADA]\nHas alcanzado la cuota mensual compartida de 2.000 llamadas de los servicios MCP de Frontera. El consumo se comparte entre los MCP vinculados a tu cuenta y se restablece el ${resetDate}. Si necesitas ampliar tu capacidad, contacta al equipo de Frontera.`
+    : `[FRONTERA FUNDS DATA MCP: LÍMITE DE VELOCIDAD]\nHas superado el límite compartido de 50 llamadas por minuto de los servicios MCP de Frontera. Espera ${retryAfter} segundos y vuelve a intentarlo.`;
+  return Response.json({ jsonrpc: "2.0", id: rpcId, result: { isError: true, content: [{ type: "text", text: message }] } }, { status: 200, headers: { "Retry-After": String(retryAfter), "X-MCP-Quota-Status": "exceeded" } });
 }
 
 async function handleJsonRpcMessage(
@@ -273,22 +330,12 @@ export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
 }
 
-export async function DELETE() {
-  return new NextResponse(null, { status: 200, headers: CORS_HEADERS });
-}
-
-export async function GET(req: NextRequest) {
-  if (!checkMcpAuth(req)) {
-    return NextResponse.json(
-      { error: "Unauthorized. Provide valid Bearer token or api_key." },
-      { status: 401, headers: CORS_HEADERS }
-    );
-  }
-
+async function handleGET(req: Request) {
+  const requestUrl = new URL(req.url);
   const accept = req.headers.get("accept") || "";
   // Si un cliente MCP (SSE legado o Streamable HTTP) abre stream GET con text/event-stream:
   if (accept.includes("text/event-stream")) {
-    const postUrl = `${req.nextUrl.origin}/api/mcp${req.nextUrl.search}`;
+    const postUrl = `${requestUrl.origin}/api/mcp${requestUrl.search}`;
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       start(controller) {
@@ -324,27 +371,15 @@ export async function GET(req: NextRequest) {
       tools_count: MCP_TOOLS.length,
       tools: MCP_TOOLS.map((t) => ({ name: t.name, description: t.description })),
       usage: {
-        mcp_endpoint: `${req.nextUrl.origin}/api/mcp`,
-        byok_header_optional: "x-socrata-app-token: <TU_APP_TOKEN_DATOS_GOV_CO>",
-        byok_query_optional: `${req.nextUrl.origin}/api/mcp?app_token=<TU_APP_TOKEN_DATOS_GOV_CO>`
+        mcp_endpoint: `${requestUrl.origin}/api/mcp`,
+        byok_header_optional: "x-socrata-app-token: <TU_APP_TOKEN_DATOS_GOV_CO>"
       }
     },
     { status: 200, headers: CORS_HEADERS }
   );
 }
 
-export async function POST(req: NextRequest) {
-  if (!checkMcpAuth(req)) {
-    return NextResponse.json(
-      {
-        jsonrpc: "2.0",
-        id: null,
-        error: { code: -32001, message: "Unauthorized MCP request" }
-      },
-      { status: 401, headers: CORS_HEADERS }
-    );
-  }
-
+async function handlePOST(req: Request) {
   const userToken = extractUserSocrataToken(req);
   const sessionId = req.headers.get("mcp-session-id") || "mcp-sfc-session";
 
@@ -394,3 +429,39 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+
+const authenticatedHandler = pipeline(
+  [
+    withOAuthProtectedResource({
+      resourceServer: (request) => new URL(request.url).origin + "/api/mcp",
+      authorizationServer: fromSupabaseUrl(supabaseUrl)
+    }),
+    withSupabase({
+      auth: "user",
+      issuer: fromSupabaseUrl(supabaseUrl),
+      env: {
+        url: supabaseUrl,
+        publishableKeys: { default: supabasePublishableKey },
+        jwks: supabaseJwksUrl
+      }
+    })
+  ],
+  async (request) => {
+    try {
+      const quotaResponse = await enforceToolQuota(request);
+      if (quotaResponse) return withCors(quotaResponse);
+      if (request.method === "GET") return withCors(await handleGET(request));
+      if (request.method === "POST") return withCors(await handlePOST(request));
+      if (request.method === "DELETE") return withCors(new NextResponse(null, { status: 200, headers: CORS_HEADERS }));
+      return withCors(new NextResponse("Method Not Allowed", { status: 405, headers: CORS_HEADERS }));
+    } catch (error) {
+      console.error("MCP request failed", error);
+      return withCors(NextResponse.json({ error: "MCP request failed." }, { status: 500, headers: CORS_HEADERS }));
+    }
+  }
+);
+const handle = async (request: Request): Promise<Response> => withCors(await authenticatedHandler(request));
+export const GET = handle;
+export const POST = handle;
+export const DELETE = handle;
