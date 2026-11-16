@@ -14,6 +14,8 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://laankpkyvzeierrnktte.supabase.co";
+const supabasePublishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
+const supabaseJwksUrl = new URL(`${supabaseUrl}/auth/v1/.well-known/jwks.json`);
 const QUOTA_SOURCE_ID = "frontera_funds";
 
 const SERVER_INFO = {
@@ -435,7 +437,15 @@ const authenticatedHandler = pipeline(
       resourceServer: (request) => new URL(request.url).origin + "/api/mcp",
       authorizationServer: fromSupabaseUrl(supabaseUrl)
     }),
-    withSupabase({ auth: "user" })
+    withSupabase({
+      auth: "user",
+      issuer: fromSupabaseUrl(supabaseUrl),
+      env: {
+        url: supabaseUrl,
+        publishableKeys: { default: supabasePublishableKey },
+        jwks: supabaseJwksUrl
+      }
+    })
   ],
   async (request) => {
     try {
