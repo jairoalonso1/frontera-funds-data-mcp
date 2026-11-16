@@ -1,7 +1,7 @@
 {
-  "name": "mcp-sfc-fics-colombia",
+  "name": "frontera-funds-data-mcp",
   "version": "1.0.0",
-  "description": "Servidor MCP (Model Context Protocol) sobre HTTPS para Fondos de Inversión Colectiva (FICs) y Fondos de Capital Privado (FCP) de la Superintendencia Financiera de Colombia (SFC - qhpu-8ixx)",
+  "description": "MCP independiente para acceso a datos públicos SFC de FIC y FCP de Colombia (datos.gov.co / qhpu-8ixx).",
   "private": true,
   "scripts": {
     "dev": "next dev",

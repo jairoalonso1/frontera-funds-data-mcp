@@ -11,7 +11,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const SERVER_INFO = {
-  name: "mcp-sfc-fics-colombia",
+  name: "frontera-funds-data-mcp",
   version: "1.0.0"
 };
 
@@ -223,7 +223,7 @@ async function handleJsonRpcMessage(
                 role: "user",
                 content: {
                   type: "text",
-                  text: `Actúa como Portfolio Manager institucional en Colombia. Usa las herramientas del servidor MCP 'mcp-sfc-fics-colombia' en este orden:
+                  text: `Actúa como Portfolio Manager institucional en Colombia. Usa las herramientas del servidor MCP 'frontera-funds-data-mcp' en este orden:
 1. Llama a 'obtener_estado_dataset' para verificar la última fecha de corte disponible en la SFC.
 2. Llama a 'cuota_mercado_aum_entidades' para presentar el Top 15 de Sociedades Fiduciarias/Comisionistas por AUM y analiza la posición competitiva de ${entidadFoco}.
 3. Llama a 'buscar_fondos_fic' con texto_busqueda='${entidadFoco}' para detallar todos los fondos y participaciones de ${entidadFoco}, su AUM, inversionistas y rentabilidades E.A.
