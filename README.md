@@ -47,3 +47,17 @@ npm run dev
 npm run build
 npm start
 ```
+
+## Configuración del cliente MCP
+
+```json
+{
+  "mcpServers": {
+    "frontera-funds-data-mcp": {
+      "url": "https://mcp-sfc-fics-colombia.vercel.app/api/mcp"
+    }
+  }
+}
+```
+
+El nombre del repositorio y del servidor es `frontera-funds-data-mcp`. El dominio Vercel se conserva temporalmente para mantener compatibilidad con clientes existentes.
