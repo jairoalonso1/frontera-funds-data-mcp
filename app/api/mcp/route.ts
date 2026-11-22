@@ -16,11 +16,14 @@ export const maxDuration = 60;
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://laankpkyvzeierrnktte.supabase.co";
 const supabasePublishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
 const supabaseJwksUrl = new URL(`${supabaseUrl}/auth/v1/.well-known/jwks.json`);
+const PRODUCT_KEY = "funds_data";
 const QUOTA_SOURCE_ID = "frontera_funds";
+const DEFAULT_MONTHLY_LIMIT = 1500;
+const DEFAULT_PER_MINUTE_LIMIT = 30;
 
 const SERVER_INFO = {
   name: "frontera-funds-data-mcp",
-  version: "1.1.0"
+  version: "1.2.0"
 };
 
 const CORS_HEADERS: Record<string, string> = {
@@ -28,7 +31,8 @@ const CORS_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
   "Access-Control-Allow-Headers":
     "Content-Type, Authorization, MCP-Protocol-Version, x-socrata-app-token, X-App-Token, mcp-session-id, Mcp-Session-Id, Accept, Last-Event-ID",
-  "Access-Control-Expose-Headers": "MCP-Protocol-Version, mcp-session-id, Mcp-Session-Id, WWW-Authenticate, Retry-After, X-MCP-Quota-Status"
+  "Access-Control-Expose-Headers":
+    "MCP-Protocol-Version, mcp-session-id, Mcp-Session-Id, WWW-Authenticate, Retry-After, X-MCP-Quota-Status, X-MCP-Product-Key"
 };
 
 function withCors(response: Response): Response {
@@ -60,48 +64,232 @@ function extractIdentityFromVerifiedBearer(authorization: string | null): string
     return typeof payload.sub === "string" && payload.sub.length > 0 ? payload.sub : null;
   } catch { return null; }
 }
+
 function getNextMonthResetDateUTC(): string {
   const now = new Date();
   const nextMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
   return nextMonth.toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 }
-async function enforceToolQuota(request: Request): Promise<Response | null> {
-  if (request.method !== "POST") return null;
+
+type QuotaContext = {
+  userId: string;
+  calls: number;
+  firstToolName: string | null;
+};
+
+type QuotaCheckOutcome = {
+  blockedResponse: Response | null;
+  quotaContext: QuotaContext | null;
+};
+
+function inspectMcpPayloadOutcomes(
+  status: number,
+  bodyText: string,
+  expectedCalls: number
+): { successCalls: number; errorCalls: number } {
+  if (status >= 400) {
+    return { successCalls: 0, errorCalls: expectedCalls };
+  }
+  const messages: Array<{ error?: unknown; result?: { isError?: boolean } }> = [];
+  try {
+    if (bodyText.trim().length > 0) {
+      const parsed = JSON.parse(bodyText);
+      if (Array.isArray(parsed)) messages.push(...parsed);
+      else if (parsed && typeof parsed === "object") messages.push(parsed);
+    }
+  } catch {
+    return { successCalls: expectedCalls, errorCalls: 0 };
+  }
+  if (messages.length === 0) {
+    return { successCalls: expectedCalls, errorCalls: 0 };
+  }
+  let errorCalls = 0;
+  let successCalls = 0;
+  for (const msg of messages) {
+    const isErr = Boolean(msg?.error) || msg?.result?.isError === true;
+    if (isErr) errorCalls += 1;
+    else successCalls += 1;
+  }
+  const totalObserved = successCalls + errorCalls;
+  if (totalObserved > expectedCalls) {
+    const clampedErrors = Math.min(errorCalls, expectedCalls);
+    return { successCalls: Math.max(0, expectedCalls - clampedErrors), errorCalls: clampedErrors };
+  }
+  return { successCalls, errorCalls };
+}
+
+async function recordMcpUsage(
+  ctx: QuotaContext,
+  calls: number,
+  billable: boolean
+): Promise<void> {
+  if (calls < 1) return;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceRoleKey) return;
+  try {
+    const res = await fetch(`${supabaseUrl}/rest/v1/rpc/record_mcp_usage`, {
+      method: "POST",
+      headers: {
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        p_user_id: ctx.userId,
+        p_product_key: PRODUCT_KEY,
+        p_calls: calls,
+        p_billable: billable,
+        p_source_id: QUOTA_SOURCE_ID,
+        p_tool_name: ctx.firstToolName
+      }),
+      cache: "no-store",
+      signal: AbortSignal.timeout(8000)
+    });
+    if (!res.ok) {
+      console.error("MCP usage record failed", res.status);
+    }
+  } catch (err) {
+    console.error("MCP usage record error", err);
+  }
+}
+
+async function checkToolQuota(request: Request): Promise<QuotaCheckOutcome> {
+  if (request.method !== "POST") return { blockedResponse: null, quotaContext: null };
   let body: unknown;
-  try { body = await request.clone().json(); } catch { return null; }
+  try { body = await request.clone().json(); } catch { return { blockedResponse: null, quotaContext: null }; }
   const { calls, firstToolName, rpcId } = extractToolCalls(body);
-  if (calls === 0) return null;
-  if (calls > 100) return Response.json({ jsonrpc: "2.0", id: rpcId, error: { code: -32600, message: "El lote supera el máximo de 100 llamadas de herramientas." } }, { status: 400 });
+  if (calls === 0) return { blockedResponse: null, quotaContext: null };
+  if (calls > 100) {
+    return {
+      blockedResponse: Response.json(
+        { jsonrpc: "2.0", id: rpcId, error: { code: -32600, message: "El lote supera el máximo de 100 llamadas de herramientas." } },
+        { status: 400 }
+      ),
+      quotaContext: null
+    };
+  }
+
   const authorization = request.headers.get("authorization");
   const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!authorization?.startsWith("Bearer ") || !publishableKey || !serviceRoleKey) {
+  if (!authorization?.startsWith("Bearer ") || !serviceRoleKey) {
     console.error("MCP authentication or quota configuration is incomplete.");
-    return Response.json({ error: "MCP authentication or quota service is unavailable." }, { status: 503 });
+    return {
+      blockedResponse: Response.json({ error: "MCP authentication or quota service is unavailable." }, { status: 503 }),
+      quotaContext: null
+    };
   }
+
   let userId = extractIdentityFromVerifiedBearer(authorization);
-  if (!userId) {
-    const userResponse = await fetch(`${supabaseUrl}/auth/v1/user`, { headers: { apikey: publishableKey, Authorization: authorization }, cache: "no-store" });
-    if (!userResponse.ok) return Response.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId && publishableKey) {
+    const userResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      headers: { apikey: publishableKey, Authorization: authorization },
+      cache: "no-store",
+      signal: AbortSignal.timeout(8000)
+    });
+    if (!userResponse.ok) {
+      return { blockedResponse: Response.json({ error: "Unauthorized" }, { status: 401 }), quotaContext: null };
+    }
     const user = await userResponse.json() as { id?: string };
     userId = user.id ?? null;
   }
-  if (!userId) return Response.json({ error: "Unauthorized" }, { status: 401 });
-  const quotaResponse = await fetch(`${supabaseUrl}/rest/v1/rpc/consume_mcp_quota`, {
+  if (!userId) {
+    return { blockedResponse: Response.json({ error: "Unauthorized" }, { status: 401 }), quotaContext: null };
+  }
+
+  const quotaResponse = await fetch(`${supabaseUrl}/rest/v1/rpc/check_mcp_quota`, {
     method: "POST",
-    headers: { apikey: serviceRoleKey, Authorization: `Bearer ${serviceRoleKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ p_user_id: userId, p_calls: calls, p_monthly_limit: 2000, p_per_minute_limit: 50, p_source_id: QUOTA_SOURCE_ID, p_tool_name: firstToolName }),
-    cache: "no-store"
-  });
-  if (!quotaResponse.ok) { console.error("MCP quota check failed", quotaResponse.status); return Response.json({ error: "MCP quota service is temporarily unavailable." }, { status: 503 }); }
-  const quota = await quotaResponse.json() as { allowed?: boolean; reason?: "monthly" | "per_minute"; retry_after?: number };
-  if (quota.allowed) return null;
+    headers: {
+      apikey: serviceRoleKey,
+      Authorization: `Bearer ${serviceRoleKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      p_user_id: userId,
+      p_product_key: PRODUCT_KEY,
+      p_calls: calls,
+      p_default_monthly_limit: DEFAULT_MONTHLY_LIMIT,
+      p_default_per_minute_limit: DEFAULT_PER_MINUTE_LIMIT
+    }),
+    cache: "no-store",
+    signal: AbortSignal.timeout(8000)
+  }).catch(() => null);
+
+  if (!quotaResponse?.ok) {
+    console.error("MCP quota check failed", quotaResponse?.status ?? "network");
+    return {
+      blockedResponse: Response.json({ error: "MCP quota service is temporarily unavailable." }, { status: 503 }),
+      quotaContext: null
+    };
+  }
+
+  const quota = await quotaResponse.json() as {
+    allowed?: boolean;
+    reason?: "monthly" | "per_minute";
+    http_status?: number;
+    plan_code?: string;
+    monthly_used?: number;
+    monthly_limit?: number;
+    minute_used?: number;
+    per_minute_limit?: number;
+    retry_after?: number;
+  };
+
+  if (quota.allowed) {
+    return {
+      blockedResponse: null,
+      quotaContext: { userId, calls, firstToolName }
+    };
+  }
+
+  const isMonthly = quota.reason === "monthly";
+  const httpStatus = quota.http_status ?? (isMonthly ? 402 : 429);
   const retryAfter = Math.max(1, Math.ceil(quota.retry_after ?? 60));
+  const monthlyLimit = quota.monthly_limit ?? DEFAULT_MONTHLY_LIMIT;
+  const perMinuteLimit = quota.per_minute_limit ?? DEFAULT_PER_MINUTE_LIMIT;
   const resetDate = getNextMonthResetDateUTC();
-  const message = quota.reason === "monthly"
-    ? `[FRONTERA FUNDS DATA MCP: CUOTA MENSUAL ALCANZADA]\nHas alcanzado la cuota mensual compartida de 2.000 llamadas de los servicios MCP de Frontera. El consumo se comparte entre los MCP vinculados a tu cuenta y se restablece el ${resetDate}. Si necesitas ampliar tu capacidad, contacta al equipo de Frontera.`
-    : `[FRONTERA FUNDS DATA MCP: LÍMITE DE VELOCIDAD]\nHas superado el límite compartido de 50 llamadas por minuto de los servicios MCP de Frontera. Espera ${retryAfter} segundos y vuelve a intentarlo.`;
-  return Response.json({ jsonrpc: "2.0", id: rpcId, result: { isError: true, content: [{ type: "text", text: message }] } }, { status: 200, headers: { "Retry-After": String(retryAfter), "X-MCP-Quota-Status": "exceeded" } });
+  const billingUrl = `${new URL(request.url).origin}/billing`;
+
+  const message = isMonthly
+    ? `Alcanzaste el límite mensual de ${monthlyLimit.toLocaleString("es-CO")} consultas exitosas de Frontera Funds Data MCP (${quota.plan_code ?? "free"}). Tu cuota es independiente de otros productos y se restablece el ${resetDate}. Amplía tu plan en ${billingUrl}.`
+    : `Alcanzaste el límite de velocidad de ${perMinuteLimit} consultas por minuto de Frontera Funds Data MCP. Espera ${retryAfter} segundos y vuelve a intentarlo.`;
+
+  return {
+    blockedResponse: Response.json(
+      {
+        jsonrpc: "2.0",
+        id: rpcId,
+        error: {
+          code: isMonthly ? -32002 : -32029,
+          message,
+          data: {
+            status: "quota_exceeded",
+            reason: quota.reason ?? "per_minute",
+            http_status: httpStatus,
+            product_key: PRODUCT_KEY,
+            plan_code: quota.plan_code ?? "free",
+            monthly_used: quota.monthly_used ?? 0,
+            monthly_limit: monthlyLimit,
+            minute_used: quota.minute_used ?? 0,
+            per_minute_limit: perMinuteLimit,
+            retry_after_seconds: retryAfter,
+            monthly_reset: resetDate,
+            billing_url: billingUrl,
+            contact: "powerportfoliomanagement@gmail.com"
+          }
+        }
+      },
+      {
+        status: httpStatus,
+        headers: {
+          "Retry-After": String(retryAfter),
+          "X-MCP-Quota-Status": "exceeded",
+          "X-MCP-Product-Key": PRODUCT_KEY
+        }
+      }
+    ),
+    quotaContext: null
+  };
 }
 
 async function handleJsonRpcMessage(
@@ -430,7 +618,6 @@ async function handlePOST(req: Request) {
   }
 }
 
-
 const authenticatedHandler = pipeline(
   [
     withOAuthProtectedResource({
@@ -448,15 +635,38 @@ const authenticatedHandler = pipeline(
     })
   ],
   async (request) => {
+    let activeQuotaContext: QuotaContext | null = null;
     try {
-      const quotaResponse = await enforceToolQuota(request);
-      if (quotaResponse) return withCors(quotaResponse);
+      const { blockedResponse, quotaContext } = await checkToolQuota(request);
+      if (blockedResponse) return withCors(blockedResponse);
+      activeQuotaContext = quotaContext;
+
       if (request.method === "GET") return withCors(await handleGET(request));
-      if (request.method === "POST") return withCors(await handlePOST(request));
+      if (request.method === "POST") {
+        const mcpResponse = await handlePOST(request);
+        if (activeQuotaContext) {
+          const clonedText = await mcpResponse.clone().text().catch(() => "");
+          const { successCalls, errorCalls } = inspectMcpPayloadOutcomes(
+            mcpResponse.status,
+            clonedText,
+            activeQuotaContext.calls
+          );
+          if (successCalls > 0) {
+            await recordMcpUsage(activeQuotaContext, successCalls, true);
+          }
+          if (errorCalls > 0) {
+            await recordMcpUsage(activeQuotaContext, errorCalls, false);
+          }
+        }
+        return withCors(mcpResponse);
+      }
       if (request.method === "DELETE") return withCors(new NextResponse(null, { status: 200, headers: CORS_HEADERS }));
       return withCors(new NextResponse("Method Not Allowed", { status: 405, headers: CORS_HEADERS }));
     } catch (error) {
       console.error("MCP request failed", error);
+      if (activeQuotaContext) {
+        await recordMcpUsage(activeQuotaContext, activeQuotaContext.calls, false);
+      }
       return withCors(NextResponse.json({ error: "MCP request failed." }, { status: 500, headers: CORS_HEADERS }));
     }
   }
