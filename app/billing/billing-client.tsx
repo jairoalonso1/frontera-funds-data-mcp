@@ -8,6 +8,20 @@ type Scope = "funds_data" | "suite";
 const CHECKOUT_ENDPOINT = "https://opendata.fronteraeficiente.com/api/billing/checkout";
 const CONTACT_EMAIL = "powerportfoliomanagement@gmail.com";
 
+function BrandMark({ variant = "funds_data", size = 38 }: { variant?: "opendata" | "funds_data" | "suite"; size?: number }) {
+  const accent = variant === "opendata" ? "#0FA968" : "#1D63ED";
+  const secondary = variant === "suite" ? "#0FA968" : accent;
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40" fill="none" aria-hidden="true">
+      <rect width="40" height="40" rx="10" fill="#0B1F3B" />
+      <rect x="0.75" y="0.75" width="38.5" height="38.5" rx="9.25" stroke="rgba(255,255,255,0.14)" strokeWidth="1.5" />
+      <rect x="11" y="9" width="18" height="4.8" rx="1.5" fill={accent} />
+      <rect x="11" y="17.2" width="13.5" height="4.8" rx="1.5" fill={secondary} />
+      <rect x="11" y="9" width="5" height="22" rx="1.5" fill="#FFFFFF" />
+    </svg>
+  );
+}
+
 const CYCLES: Array<{ id: Cycle; label: string; badge?: string }> = [
   { id: "1m", label: "Mensual" },
   { id: "6m", label: "6 meses", badge: "1 mes gratis" },
@@ -16,16 +30,16 @@ const CYCLES: Array<{ id: Cycle; label: string; badge?: string }> = [
 
 const PLANS: Record<Scope, Array<{ code: "starter" | "pro" | "ultra" | "team"; name: string; quota: string; rate: string; prices: Record<Cycle, number>; featured?: boolean; note: string }>> = {
   funds_data: [
-    { code: "starter", name: "Starter / Analista", quota: "5.000 exitosas / mes", rate: "60/min", prices: { "1m": 45000, "6m": 225000, "12m": 360000 }, note: "1 usuario · 12 herramientas SFC (qhpu-8ixx)." },
-    { code: "pro", name: "Pro", quota: "15.000 exitosas / mes", rate: "90/min", prices: { "1m": 79000, "6m": 395000, "12m": 632000 }, featured: true, note: "El más elegido · autoservicio completo." },
-    { code: "ultra", name: "Ultra", quota: "50.000 exitosas / mes", rate: "120/min", prices: { "1m": 149000, "6m": 745000, "12m": 1192000 }, note: "Power User · 1–2 usuarios · soporte por correo." },
-    { code: "team", name: "Mesa / Equipo", quota: "100.000 exitosas / mes", rate: "180/min", prices: { "1m": 249000, "6m": 1245000, "12m": 1992000 }, note: "Hasta 5 puestos · fiduciarias y comités." },
+    { code: "starter", name: "Starter / Analista", quota: "5.000 exitosas / mes", rate: "60/min", prices: { "1m": 29000, "6m": 145000, "12m": 232000 }, note: "1 usuario · 12 herramientas SFC (qhpu-8ixx)." },
+    { code: "pro", name: "Pro", quota: "15.000 exitosas / mes", rate: "90/min", prices: { "1m": 49000, "6m": 245000, "12m": 392000 }, featured: true, note: "El más elegido · autoservicio completo." },
+    { code: "ultra", name: "Ultra", quota: "50.000 exitosas / mes", rate: "120/min", prices: { "1m": 99000, "6m": 495000, "12m": 792000 }, note: "Power User · 1–2 usuarios · soporte por correo." },
+    { code: "team", name: "Mesa / Equipo", quota: "100.000 exitosas / mes", rate: "180/min", prices: { "1m": 179000, "6m": 895000, "12m": 1432000 }, note: "Hasta 5 puestos · fiduciarias y comités." },
   ],
   suite: [
-    { code: "starter", name: "Suite Starter", quota: "5.000 / mes por MCP", rate: "60/min", prices: { "1m": 64000, "6m": 320000, "12m": 512000 }, note: "OpenData + Funds Data MCP (-20% vs. separado)." },
-    { code: "pro", name: "Suite Pro", quota: "15.000 / mes por MCP", rate: "90/min", prices: { "1m": 109000, "6m": 545000, "12m": 872000 }, featured: true, note: "OpenData + Funds Data MCP (-21% vs. separado)." },
-    { code: "ultra", name: "Suite Ultra", quota: "50.000 / mes por MCP", rate: "120/min", prices: { "1m": 215000, "6m": 1075000, "12m": 1720000 }, note: "OpenData + Funds Data MCP (-20% vs. separado)." },
-    { code: "team", name: "Suite Empresa / Mesa", quota: "100.000 / mes por MCP", rate: "180/min", prices: { "1m": 359000, "6m": 1795000, "12m": 2872000 }, note: "Hasta 5 puestos en ambos MCPs (-20%)." },
+    { code: "starter", name: "Suite Starter", quota: "5.000 / mes por MCP", rate: "60/min", prices: { "1m": 43000, "6m": 215000, "12m": 344000 }, note: "OpenData + Funds Data MCP (-20% vs. separado)." },
+    { code: "pro", name: "Suite Pro", quota: "15.000 / mes por MCP", rate: "90/min", prices: { "1m": 69000, "6m": 345000, "12m": 552000 }, featured: true, note: "OpenData + Funds Data MCP (-21% vs. separado)." },
+    { code: "ultra", name: "Suite Ultra", quota: "50.000 / mes por MCP", rate: "120/min", prices: { "1m": 142000, "6m": 710000, "12m": 1136000 }, note: "OpenData + Funds Data MCP (-20% vs. separado)." },
+    { code: "team", name: "Suite Empresa / Mesa", quota: "100.000 / mes por MCP", rate: "180/min", prices: { "1m": 259000, "6m": 1295000, "12m": 2072000 }, note: "Hasta 5 puestos en ambos MCPs (-20%)." },
   ],
 };
 
@@ -51,13 +65,7 @@ export function BillingClient({ status }: { status?: string }) {
       const res = await fetch(CHECKOUT_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: email.trim(),
-          productScope: scope,
-          planCode,
-          cycle,
-          returnOrigin: window.location.origin,
-        }),
+        body: JSON.stringify({ email: email.trim(), productScope: scope, planCode, cycle, returnOrigin: window.location.origin }),
       });
       const data = await res.json();
       if (!res.ok || !data.checkoutUrl) {
@@ -91,10 +99,17 @@ export function BillingClient({ status }: { status?: string }) {
       )}
 
       <section style={{ background: "#0B1F3B", color: "#FFFFFF", borderRadius: 16, padding: "24px 28px", marginBottom: 24 }}>
-        <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "#60A5FA", marginBottom: 8 }}>Checkout seguro · Mercado Pago (COP)</div>
-        <h1 style={{ margin: "0 0 10px", fontSize: 26, lineHeight: 1.25, fontWeight: 700 }}>Amplía tu cuota de Frontera Funds Data MCP</h1>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+          <BrandMark variant={scope} size={28} />
+          <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "#60A5FA" }}>
+            {scope === "suite" ? "Frontera Data Suite Modular · Checkout COP" : "Frontera Funds Data MCP · Checkout COP"}
+          </span>
+        </div>
+        <h1 style={{ margin: "0 0 10px", fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: 26, lineHeight: 1.25, fontWeight: 700 }}>
+          Amplía tu cuota con pago único en COP
+        </h1>
         <p style={{ margin: "0 0 18px", fontSize: 14, lineHeight: 1.6, color: "#CBD5E1" }}>
-          Pago único sin suscripciones forzosas (Tarjeta, PSE o efectivo). Tu plan Free incluye 1.500 consultas exitosas/mes y los errores de fuente nunca descuentan cuota.
+          Sin suscripciones forzosas (Tarjeta, PSE o efectivo vía Mercado Pago). Tu plan Free incluye 1.500 consultas exitosas/mes y los errores de fuente nunca descuentan cuota.
         </p>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
           <input
@@ -110,11 +125,11 @@ export function BillingClient({ status }: { status?: string }) {
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
         <div style={{ display: "inline-flex", background: "#E2E8F0", padding: 4, borderRadius: 10, gap: 4 }}>
-          <button type="button" onClick={() => setScope("funds_data")} style={{ padding: "8px 14px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, background: scope === "funds_data" ? "#0B1F3B" : "transparent", color: scope === "funds_data" ? "#FFFFFF" : "#334155" }}>
-            Solo Funds Data MCP
+          <button type="button" onClick={() => setScope("funds_data")} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, background: scope === "funds_data" ? "#0B1F3B" : "transparent", color: scope === "funds_data" ? "#FFFFFF" : "#334155" }}>
+            <BrandMark variant="funds_data" size={18} /> Solo Funds Data MCP
           </button>
-          <button type="button" onClick={() => setScope("suite")} style={{ padding: "8px 14px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, background: scope === "suite" ? "#0B1F3B" : "transparent", color: scope === "suite" ? "#FFFFFF" : "#334155" }}>
-            Data Suite Modular (-20%)
+          <button type="button" onClick={() => setScope("suite")} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, background: scope === "suite" ? "#0B1F3B" : "transparent", color: scope === "suite" ? "#FFFFFF" : "#334155" }}>
+            <BrandMark variant="suite" size={18} /> Data Suite Modular (-20%)
           </button>
         </div>
 
@@ -131,8 +146,14 @@ export function BillingClient({ status }: { status?: string }) {
         {PLANS[scope].map((plan) => (
           <div key={plan.code} style={{ background: "#FFFFFF", border: plan.featured ? "2px solid #1D63ED" : "1px solid #E2E8F0", borderRadius: 14, padding: 20, display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 14 }}>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: plan.featured ? "#1D4ED8" : "#475569", marginBottom: 6 }}>{plan.name}</div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: "#0B1F3B", marginBottom: 4 }}>{fmtCop(plan.prices[cycle])}</div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <BrandMark variant={scope} size={22} />
+                  <span style={{ fontSize: 13, fontWeight: 700, color: plan.featured ? "#1D4ED8" : "#475569" }}>{plan.name}</span>
+                </div>
+                {plan.featured && <span style={{ fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 999, background: "#EFF6FF", color: "#1D4ED8" }}>DESTACADO</span>}
+              </div>
+              <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: 22, fontWeight: 800, color: "#0B1F3B", marginBottom: 4 }}>{fmtCop(plan.prices[cycle])}</div>
               <div style={{ fontSize: 12, color: "#64748B", marginBottom: 12 }}>{cycle === "1m" ? "Pago mensual" : `Pago único por ${cycle === "6m" ? "6 meses" : "1 año"}`}</div>
               <div style={{ fontSize: 14, fontWeight: 600, color: "#0F172A", marginBottom: 4 }}>{plan.quota}</div>
               <div style={{ fontSize: 12, color: "#475569", marginBottom: 10 }}>Límite velocidad: {plan.rate}</div>
