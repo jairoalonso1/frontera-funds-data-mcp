@@ -8,16 +8,46 @@ type Scope = "funds_data" | "suite";
 const CHECKOUT_ENDPOINT = "https://opendata.fronteraeficiente.com/api/billing/checkout";
 const CONTACT_EMAIL = "powerportfoliomanagement@gmail.com";
 
-function BrandMark({ variant = "funds_data", size = 38 }: { variant?: "opendata" | "funds_data" | "suite"; size?: number }) {
-  const accent = variant === "opendata" ? "#0FA968" : "#1D63ED";
-  const secondary = variant === "suite" ? "#0FA968" : accent;
+const PALETTE = {
+  opendata: {
+    top1: "#34D399", top2: "#0FA968",
+    mid1: "#6EE7B7", mid2: "#10B981",
+    bot1: "#0FA968", bot2: "#047857",
+  },
+  funds_data: {
+    top1: "#3B82F6", top2: "#1D63ED",
+    mid1: "#60A5FA", mid2: "#2563EB",
+    bot1: "#1D63ED", bot2: "#1E3A8A",
+  },
+  suite: {
+    top1: "#2563EB", top2: "#1D63ED",
+    mid1: "#34D399", mid2: "#0FA968",
+    bot1: "#1D63ED", bot2: "#0B40B8",
+  },
+} as const;
+
+function BrandMark({ variant = "funds_data", size = 28 }: { variant?: "opendata" | "funds_data" | "suite"; size?: number }) {
+  const c = PALETTE[variant];
+  const h = Math.round(size * 1.08);
   return (
-    <svg width={size} height={size} viewBox="0 0 40 40" fill="none" aria-hidden="true">
-      <rect width="40" height="40" rx="10" fill="#0B1F3B" />
-      <rect x="0.75" y="0.75" width="38.5" height="38.5" rx="9.25" stroke="rgba(255,255,255,0.14)" strokeWidth="1.5" />
-      <rect x="11" y="9" width="18" height="4.8" rx="1.5" fill={accent} />
-      <rect x="11" y="17.2" width="13.5" height="4.8" rx="1.5" fill={secondary} />
-      <rect x="11" y="9" width="5" height="22" rx="1.5" fill="#FFFFFF" />
+    <svg width={size} height={h} viewBox="0 0 100 108" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <linearGradient id={`feTop-${variant}`} x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor={c.top1} />
+          <stop offset="100%" stopColor={c.top2} />
+        </linearGradient>
+        <linearGradient id={`feMid-${variant}`} x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor={c.mid1} />
+          <stop offset="100%" stopColor={c.mid2} />
+        </linearGradient>
+        <linearGradient id={`feBot-${variant}`} x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor={c.bot2} />
+          <stop offset="100%" stopColor={c.bot1} />
+        </linearGradient>
+      </defs>
+      <path d="M36 10 H92 C95 10 96 13 94 16 L84 34 C82 37 79 38 76 38 H22 L31 16 C32 12 34 10 36 10 Z" fill={`url(#feTop-${variant})`} />
+      <path d="M22 45 H72 C75 45 76 48 74 51 L65 68 C63 71 60 72 57 72 H10 L17 51 C18 47 20 45 22 45 Z" fill={`url(#feMid-${variant})`} />
+      <path d="M18 79 H44 L34 99 C32 102 29 103 26 103 H10 C7 103 6 100 8 97 L18 79 Z" fill={`url(#feBot-${variant})`} />
     </svg>
   );
 }
@@ -98,12 +128,21 @@ export function BillingClient({ status }: { status?: string }) {
         </div>
       )}
 
-      <section style={{ background: "#0B1F3B", color: "#FFFFFF", borderRadius: 16, padding: "24px 28px", marginBottom: 24 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-          <BrandMark variant={scope} size={28} />
-          <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "#60A5FA" }}>
-            {scope === "suite" ? "Frontera Data Suite Modular · Checkout COP" : "Frontera Funds Data MCP · Checkout COP"}
-          </span>
+      <section style={{ background: "linear-gradient(145deg, #071428 0%, #0B1F3B 65%, #102B52 100%)", color: "#FFFFFF", borderRadius: 16, padding: "24px 28px", marginBottom: 24 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+          <BrandMark variant={scope} size={30} />
+          <div style={{ borderLeft: "1px solid rgba(255,255,255,0.22)", paddingLeft: 12 }}>
+            <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: 15, fontWeight: 800, color: "#FFFFFF" }}>
+              {scope === "suite" ? (
+                <>Frontera <span style={{ color: "#34D399" }}>Data Suite</span> Modular</>
+              ) : (
+                <>Frontera <span style={{ color: "#60A5FA" }}>Funds</span> Data MCP</>
+              )}
+            </div>
+            <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#94A3B8" }}>
+              {scope === "suite" ? "OpenData + Funds Data · Checkout COP" : "Análisis y gestión de FIC · Checkout COP"}
+            </div>
+          </div>
         </div>
         <h1 style={{ margin: "0 0 10px", fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: 26, lineHeight: 1.25, fontWeight: 700 }}>
           Amplía tu cuota con pago único en COP
@@ -125,10 +164,10 @@ export function BillingClient({ status }: { status?: string }) {
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
         <div style={{ display: "inline-flex", background: "#E2E8F0", padding: 4, borderRadius: 10, gap: 4 }}>
-          <button type="button" onClick={() => setScope("funds_data")} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, background: scope === "funds_data" ? "#0B1F3B" : "transparent", color: scope === "funds_data" ? "#FFFFFF" : "#334155" }}>
+          <button type="button" onClick={() => setScope("funds_data")} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 14px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, background: scope === "funds_data" ? "#0B1F3B" : "transparent", color: scope === "funds_data" ? "#FFFFFF" : "#334155" }}>
             <BrandMark variant="funds_data" size={18} /> Solo Funds Data MCP
           </button>
-          <button type="button" onClick={() => setScope("suite")} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, background: scope === "suite" ? "#0B1F3B" : "transparent", color: scope === "suite" ? "#FFFFFF" : "#334155" }}>
+          <button type="button" onClick={() => setScope("suite")} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 14px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, background: scope === "suite" ? "#0B1F3B" : "transparent", color: scope === "suite" ? "#FFFFFF" : "#334155" }}>
             <BrandMark variant="suite" size={18} /> Data Suite Modular (-20%)
           </button>
         </div>
@@ -148,7 +187,9 @@ export function BillingClient({ status }: { status?: string }) {
             <div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <BrandMark variant={scope} size={22} />
+                  <div style={{ width: 28, height: 28, borderRadius: 7, background: "#0B1F3B", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <BrandMark variant={scope} size={17} />
+                  </div>
                   <span style={{ fontSize: 13, fontWeight: 700, color: plan.featured ? "#1D4ED8" : "#475569" }}>{plan.name}</span>
                 </div>
                 {plan.featured && <span style={{ fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 999, background: "#EFF6FF", color: "#1D4ED8" }}>DESTACADO</span>}
