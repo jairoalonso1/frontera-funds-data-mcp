@@ -5,27 +5,32 @@ export const metadata = {
   description: "Planes de consumo mensual en COP para Frontera Funds Data MCP de Frontera Eficiente.",
 };
 
-function FundsLogo({ size = 28 }: { size?: number }) {
-  const h = Math.round(size * 1.08);
+function FundsMark({ size = 30 }: { size?: number }) {
+  const h = Math.round(size * 1.06);
   return (
-    <svg width={size} height={h} viewBox="0 0 100 108" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Logo Frontera Funds">
+    <svg width={size} height={h} viewBox="0 0 100 106" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Logo Frontera Funds">
       <defs>
-        <linearGradient id="feHdrFdTop" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#3B82F6" />
-          <stop offset="100%" stopColor="#1D63ED" />
+        <linearGradient id="fdHdrT" x1="0%" y1="0%" x2="100%" y2="20%">
+          <stop offset="0%" stopColor="#158CFE" />
+          <stop offset="100%" stopColor="#005BFC" />
         </linearGradient>
-        <linearGradient id="feHdrFdMid" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#60A5FA" />
-          <stop offset="100%" stopColor="#2563EB" />
+        <linearGradient id="fdHdrM" x1="0%" y1="10%" x2="100%" y2="85%">
+          <stop offset="0%" stopColor="#38BDF8" />
+          <stop offset="100%" stopColor="#0058F9" />
         </linearGradient>
-        <linearGradient id="feHdrFdBot" x1="0%" y1="100%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#1E3A8A" />
-          <stop offset="100%" stopColor="#1D63ED" />
+        <linearGradient id="fdHdrB" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#003BA8" />
+          <stop offset="100%" stopColor="#0178FC" />
+        </linearGradient>
+        <linearGradient id="fdHdrS" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#020B1F" stopOpacity="0.58" />
+          <stop offset="100%" stopColor="#020B1F" stopOpacity="0" />
         </linearGradient>
       </defs>
-      <path d="M36 10 H92 C95 10 96 13 94 16 L84 34 C82 37 79 38 76 38 H22 L31 16 C32 12 34 10 36 10 Z" fill="url(#feHdrFdTop)" />
-      <path d="M22 45 H72 C75 45 76 48 74 51 L65 68 C63 71 60 72 57 72 H10 L17 51 C18 47 20 45 22 45 Z" fill="url(#feHdrFdMid)" />
-      <path d="M18 79 H44 L34 99 C32 102 29 103 26 103 H10 C7 103 6 100 8 97 L18 79 Z" fill="url(#feHdrFdBot)" />
+      <path d="M27 66 H56 L42 96 C39 101 35 102 30 102 H13 L27 66 Z" fill="url(#fdHdrB)" />
+      <path d="M27 66 H56 L51 77 H23 L27 66 Z" fill="url(#fdHdrS)" />
+      <path d="M29 37 L42 12 C45 7 50 5 57 5 H96 L84 30 C81 35 77 37 71 37 H29 Z" fill="url(#fdHdrT)" />
+      <path d="M24 41 H74 L63 63 C60 68 56 70 50 70 H35 C27 70 20 72 9 77 C5 79 3 76 5 72 L15 48 C17 43 20 41 24 41 Z" fill="url(#fdHdrM)" />
     </svg>
   );
 }
@@ -37,16 +42,16 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
       <div style={{ maxWidth: 980, margin: "0 auto" }}>
         <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28, flexWrap: "wrap", gap: 12 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ width: 46, height: 46, borderRadius: 12, background: "#0B1F3B", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <FundsLogo size={28} />
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 48, height: 48, borderRadius: 12, background: "#021230", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <FundsMark size={30} />
             </div>
-            <div style={{ borderLeft: "1px solid #CBD5E1", paddingLeft: 14 }}>
-              <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 18, lineHeight: 1.1, color: "#0B1F3B" }}>
+            <div>
+              <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 19, lineHeight: 1.08, color: "#0B1F3B" }}>
                 Frontera <span style={{ color: "#1D63ED" }}>Funds</span>
               </div>
               <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#64748B", marginTop: 2 }}>
-                Análisis y gestión de FIC · Data MCP
+                Análisis y gestión de FIC
               </div>
             </div>
           </div>
@@ -54,7 +59,7 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
         </header>
         <BillingClient status={params?.status} />
         <footer style={{ fontSize: 12, color: "#64748B", lineHeight: 1.6 }}>
-          Tarifas en pesos colombianos (COP, tarifa plena sin IVA en etapa Persona Natural). Las cuotas se reinician el día 1 de cada mes (UTC). Soporte: powerportfoliomanagement@gmail.com.
+          Un producto de Frontera Eficiente. Tarifas en pesos colombianos (COP, tarifa plena sin IVA en etapa Persona Natural). Las cuotas se reinician el día 1 de cada mes (UTC). Soporte: powerportfoliomanagement@gmail.com.
         </footer>
       </div>
     </main>

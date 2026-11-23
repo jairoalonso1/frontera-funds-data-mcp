@@ -10,44 +10,50 @@ const CONTACT_EMAIL = "powerportfoliomanagement@gmail.com";
 
 const PALETTE = {
   opendata: {
-    top1: "#34D399", top2: "#0FA968",
-    mid1: "#6EE7B7", mid2: "#10B981",
-    bot1: "#0FA968", bot2: "#047857",
+    t1: "#16FBE8", t2: "#00F6A6",
+    m1: "#09FCEB", m2: "#00A87C",
+    b1: "#01888D", b2: "#01F8C4",
   },
   funds_data: {
-    top1: "#3B82F6", top2: "#1D63ED",
-    mid1: "#60A5FA", mid2: "#2563EB",
-    bot1: "#1D63ED", bot2: "#1E3A8A",
+    t1: "#158CFE", t2: "#005BFC",
+    m1: "#38BDF8", m2: "#0058F9",
+    b1: "#003BA8", b2: "#0178FC",
   },
+  // Paquete combinado usa el emblema oficial de la Marca Paraguas Frontera Eficiente
   suite: {
-    top1: "#2563EB", top2: "#1D63ED",
-    mid1: "#34D399", mid2: "#0FA968",
-    bot1: "#1D63ED", bot2: "#0B40B8",
+    t1: "#29ADFD", t2: "#0269FC",
+    m1: "#00E295", m2: "#05FACE",
+    b1: "#0043C5", b2: "#017DFE",
   },
 } as const;
 
 function BrandMark({ variant = "funds_data", size = 28 }: { variant?: "opendata" | "funds_data" | "suite"; size?: number }) {
   const c = PALETTE[variant];
-  const h = Math.round(size * 1.08);
+  const h = Math.round(size * 1.06);
   return (
-    <svg width={size} height={h} viewBox="0 0 100 108" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <svg width={size} height={h} viewBox="0 0 100 106" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <defs>
-        <linearGradient id={`feTop-${variant}`} x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor={c.top1} />
-          <stop offset="100%" stopColor={c.top2} />
+        <linearGradient id={`feT-${variant}`} x1="0%" y1="0%" x2="100%" y2="20%">
+          <stop offset="0%" stopColor={c.t1} />
+          <stop offset="100%" stopColor={c.t2} />
         </linearGradient>
-        <linearGradient id={`feMid-${variant}`} x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor={c.mid1} />
-          <stop offset="100%" stopColor={c.mid2} />
+        <linearGradient id={`feM-${variant}`} x1="0%" y1="10%" x2="100%" y2="85%">
+          <stop offset="0%" stopColor={c.m1} />
+          <stop offset="100%" stopColor={c.m2} />
         </linearGradient>
-        <linearGradient id={`feBot-${variant}`} x1="0%" y1="100%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor={c.bot2} />
-          <stop offset="100%" stopColor={c.bot1} />
+        <linearGradient id={`feB-${variant}`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor={c.b1} />
+          <stop offset="100%" stopColor={c.b2} />
+        </linearGradient>
+        <linearGradient id={`feS-${variant}`} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#020B1F" stopOpacity="0.58" />
+          <stop offset="100%" stopColor="#020B1F" stopOpacity="0" />
         </linearGradient>
       </defs>
-      <path d="M36 10 H92 C95 10 96 13 94 16 L84 34 C82 37 79 38 76 38 H22 L31 16 C32 12 34 10 36 10 Z" fill={`url(#feTop-${variant})`} />
-      <path d="M22 45 H72 C75 45 76 48 74 51 L65 68 C63 71 60 72 57 72 H10 L17 51 C18 47 20 45 22 45 Z" fill={`url(#feMid-${variant})`} />
-      <path d="M18 79 H44 L34 99 C32 102 29 103 26 103 H10 C7 103 6 100 8 97 L18 79 Z" fill={`url(#feBot-${variant})`} />
+      <path d="M27 66 H56 L42 96 C39 101 35 102 30 102 H13 L27 66 Z" fill={`url(#feB-${variant})`} />
+      <path d="M27 66 H56 L51 77 H23 L27 66 Z" fill={`url(#feS-${variant})`} />
+      <path d="M29 37 L42 12 C45 7 50 5 57 5 H96 L84 30 C81 35 77 37 71 37 H29 Z" fill={`url(#feT-${variant})`} />
+      <path d="M24 41 H74 L63 63 C60 68 56 70 50 70 H35 C27 70 20 72 9 77 C5 79 3 76 5 72 L15 48 C17 43 20 41 24 41 Z" fill={`url(#feM-${variant})`} />
     </svg>
   );
 }
@@ -66,10 +72,10 @@ const PLANS: Record<Scope, Array<{ code: "starter" | "pro" | "ultra" | "team"; n
     { code: "team", name: "Mesa / Equipo", quota: "100.000 exitosas / mes", rate: "180/min", prices: { "1m": 179000, "6m": 895000, "12m": 1432000 }, note: "Hasta 5 puestos · fiduciarias y comités." },
   ],
   suite: [
-    { code: "starter", name: "Suite Starter", quota: "5.000 / mes por MCP", rate: "60/min", prices: { "1m": 43000, "6m": 215000, "12m": 344000 }, note: "OpenData + Funds Data MCP (-20% vs. separado)." },
-    { code: "pro", name: "Suite Pro", quota: "15.000 / mes por MCP", rate: "90/min", prices: { "1m": 69000, "6m": 345000, "12m": 552000 }, featured: true, note: "OpenData + Funds Data MCP (-21% vs. separado)." },
-    { code: "ultra", name: "Suite Ultra", quota: "50.000 / mes por MCP", rate: "120/min", prices: { "1m": 142000, "6m": 710000, "12m": 1136000 }, note: "OpenData + Funds Data MCP (-20% vs. separado)." },
-    { code: "team", name: "Suite Empresa / Mesa", quota: "100.000 / mes por MCP", rate: "180/min", prices: { "1m": 259000, "6m": 1295000, "12m": 2072000 }, note: "Hasta 5 puestos en ambos MCPs (-20%)." },
+    { code: "starter", name: "Combo Starter", quota: "5.000 / mes por MCP", rate: "60/min", prices: { "1m": 43000, "6m": 215000, "12m": 344000 }, note: "Frontera OpenData + Frontera Funds Data (-20%)." },
+    { code: "pro", name: "Combo Pro", quota: "15.000 / mes por MCP", rate: "90/min", prices: { "1m": 69000, "6m": 345000, "12m": 552000 }, featured: true, note: "Frontera OpenData + Frontera Funds Data (-21%)." },
+    { code: "ultra", name: "Combo Ultra", quota: "50.000 / mes por MCP", rate: "120/min", prices: { "1m": 142000, "6m": 710000, "12m": 1136000 }, note: "Frontera OpenData + Frontera Funds Data (-20%)." },
+    { code: "team", name: "Combo Empresa / Mesa", quota: "100.000 / mes por MCP", rate: "180/min", prices: { "1m": 259000, "6m": 1295000, "12m": 2072000 }, note: "Hasta 5 puestos en ambos MCPs (-20%)." },
   ],
 };
 
@@ -128,19 +134,19 @@ export function BillingClient({ status }: { status?: string }) {
         </div>
       )}
 
-      <section style={{ background: "linear-gradient(145deg, #071428 0%, #0B1F3B 65%, #102B52 100%)", color: "#FFFFFF", borderRadius: 16, padding: "24px 28px", marginBottom: 24 }}>
+      <section style={{ background: "linear-gradient(145deg, #020E24 0%, #06183D 65%, #0B1F3B 100%)", color: "#FFFFFF", borderRadius: 16, padding: "24px 28px", marginBottom: 24 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-          <BrandMark variant={scope} size={30} />
-          <div style={{ borderLeft: "1px solid rgba(255,255,255,0.22)", paddingLeft: 12 }}>
-            <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: 15, fontWeight: 800, color: "#FFFFFF" }}>
+          <BrandMark variant={scope} size={32} />
+          <div style={scope === "suite" ? { borderLeft: "1px solid rgba(255,255,255,0.28)", paddingLeft: 12 } : undefined}>
+            <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: 16, fontWeight: 800, color: "#FFFFFF" }}>
               {scope === "suite" ? (
-                <>Frontera <span style={{ color: "#34D399" }}>Data Suite</span> Modular</>
+                <>Frontera Eficiente · <span style={{ color: "#01E99F" }}>Paquete OpenData + Funds</span></>
               ) : (
-                <>Frontera <span style={{ color: "#60A5FA" }}>Funds</span> Data MCP</>
+                <>Frontera <span style={{ color: "#0084FF" }}>Funds</span></>
               )}
             </div>
             <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#94A3B8" }}>
-              {scope === "suite" ? "OpenData + Funds Data · Checkout COP" : "Análisis y gestión de FIC · Checkout COP"}
+              {scope === "suite" ? "Inteligencia financiera en acción · Ahorro 20%" : "Análisis y gestión de FIC · Checkout COP"}
             </div>
           </div>
         </div>
@@ -164,11 +170,11 @@ export function BillingClient({ status }: { status?: string }) {
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
         <div style={{ display: "inline-flex", background: "#E2E8F0", padding: 4, borderRadius: 10, gap: 4 }}>
-          <button type="button" onClick={() => setScope("funds_data")} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 14px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, background: scope === "funds_data" ? "#0B1F3B" : "transparent", color: scope === "funds_data" ? "#FFFFFF" : "#334155" }}>
-            <BrandMark variant="funds_data" size={18} /> Solo Funds Data MCP
+          <button type="button" onClick={() => setScope("funds_data")} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 14px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, background: scope === "funds_data" ? "#021230" : "transparent", color: scope === "funds_data" ? "#FFFFFF" : "#334155" }}>
+            <BrandMark variant="funds_data" size={18} /> Solo Frontera Funds
           </button>
-          <button type="button" onClick={() => setScope("suite")} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 14px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, background: scope === "suite" ? "#0B1F3B" : "transparent", color: scope === "suite" ? "#FFFFFF" : "#334155" }}>
-            <BrandMark variant="suite" size={18} /> Data Suite Modular (-20%)
+          <button type="button" onClick={() => setScope("suite")} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 14px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, background: scope === "suite" ? "#021230" : "transparent", color: scope === "suite" ? "#FFFFFF" : "#334155" }}>
+            <BrandMark variant="suite" size={18} /> OpenData + Funds (-20%)
           </button>
         </div>
 
@@ -187,8 +193,8 @@ export function BillingClient({ status }: { status?: string }) {
             <div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: 7, background: "#0B1F3B", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <BrandMark variant={scope} size={17} />
+                  <div style={{ width: 30, height: 30, borderRadius: 8, background: "#021230", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <BrandMark variant={scope} size={18} />
                   </div>
                   <span style={{ fontSize: 13, fontWeight: 700, color: plan.featured ? "#1D4ED8" : "#475569" }}>{plan.name}</span>
                 </div>
