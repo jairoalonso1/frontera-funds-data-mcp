@@ -66,7 +66,7 @@ const CYCLES: Array<{ id: Cycle; label: string; badge?: string }> = [
 
 const PLANS: Record<Scope, Array<{ code: "starter" | "pro" | "ultra" | "team"; name: string; quota: string; rate: string; prices: Record<Cycle, number>; featured?: boolean; note: string }>> = {
   funds_data: [
-    { code: "starter", name: "Starter / Analista", quota: "5.000 exitosas / mes", rate: "60/min", prices: { "1m": 29000, "6m": 145000, "12m": 232000 }, note: "1 usuario · 12 herramientas SFC (qhpu-8ixx)." },
+    { code: "starter", name: "Starter / Analista", quota: "5.000 exitosas / mes", rate: "60/min", prices: { "1m": 29000, "6m": 145000, "12m": 232000 }, note: "1 usuario · 12 herramientas de análisis de fondos." },
     { code: "pro", name: "Pro", quota: "15.000 exitosas / mes", rate: "90/min", prices: { "1m": 49000, "6m": 245000, "12m": 392000 }, featured: true, note: "El más elegido · autoservicio completo." },
     { code: "ultra", name: "Ultra", quota: "50.000 exitosas / mes", rate: "120/min", prices: { "1m": 99000, "6m": 495000, "12m": 792000 }, note: "Power User · 1–2 usuarios · soporte por correo." },
     { code: "team", name: "Mesa / Equipo", quota: "100.000 exitosas / mes", rate: "180/min", prices: { "1m": 179000, "6m": 895000, "12m": 1432000 }, note: "Hasta 5 puestos · fiduciarias y comités." },

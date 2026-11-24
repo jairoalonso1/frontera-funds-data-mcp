@@ -23,7 +23,7 @@ export const MCP_TOOLS: McpToolDefinition[] = [
   {
     name: "obtener_estado_dataset",
     description:
-      "Obtiene el estado actual del dataset oficial qhpu-8ixx de la Superintendencia Financiera de Colombia (SFC) en datos.gov.co: fecha máxima de corte reportada, total de registros históricos, número de entidades y fondos activos, estado del App Token Socrata y diccionario de las 26 columnas.",
+      "Obtiene el estado actual de la base de datos de Fondos de Inversión en Colombia: fecha máxima de corte reportada, total de registros históricos, número de entidades y fondos activos, y diccionario de las 26 columnas disponibles.",
     inputSchema: {
       type: "object",
       properties: {
@@ -298,7 +298,7 @@ export const MCP_TOOLS: McpToolDefinition[] = [
         },
         limite: {
           type: "number",
-          description: "Máximo de observaciones a extraer de Socrata (por defecto 365).",
+          description: "Máximo de observaciones a extraer (por defecto 365).",
           default: 365
         }
       }
@@ -363,7 +363,7 @@ export const MCP_TOOLS: McpToolDefinition[] = [
   {
     name: "ejecutar_soql_avanzado",
     description:
-      "Ejecuta una consulta SoQL (Socrata Query Language) directa y personalizada sobre el dataset qhpu-8ixx (https://www.datos.gov.co/resource/qhpu-8ixx.json). Ideal para agregaciones ad-hoc, cruces estadísticos o filtros avanzados usando las 26 columnas oficiales de la SFC.",
+      "Ejecuta una consulta avanzada personalizada (sintaxis SoQL) sobre la base de datos de Fondos de Inversión en Colombia. Ideal para agregaciones ad-hoc, cruces estadísticos o filtros avanzados usando las 26 columnas disponibles.",
     inputSchema: {
       type: "object",
       properties: {

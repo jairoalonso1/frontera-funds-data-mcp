@@ -47,7 +47,7 @@ const FUNDS_DATA_PLANS: Array<{
     monthlyLimit: 5000,
     perMinuteLimit: 60,
     pricesCop: { "1m": 29000, "6m": 145000, "12m": 232000 },
-    description: "1 usuario · 5.000 consultas exitosas/mes · 12 herramientas SFC (qhpu-8ixx).",
+    description: "1 usuario · 5.000 consultas exitosas/mes · 12 herramientas de análisis de fondos.",
   },
   {
     code: "pro",
@@ -112,7 +112,7 @@ const FIVE_PILLARS = [
     tag: "MCP PÚBLICO · DATOS SFC",
     title: "Frontera Funds Data MCP",
     badge: "Gratis 1.500/mes · Planes desde $29.000",
-    desc: "Servidor MCP independiente conectado al dataset oficial qhpu-8ixx de la Superintendencia Financiera de Colombia en datos.gov.co con 12 herramientas cuantitativas e institucionales.",
+    desc: "Servidor MCP independiente conectado con la información de los Fondos de Inversión en Colombia, con 12 herramientas cuantitativas e institucionales.",
     bullets: [
       "Rentabilidades E.A., AUM, cuota de mercado y flujos netos",
       "Radar de liquidez, riesgo cuantitativo y peer groups",
@@ -565,7 +565,7 @@ export function FundsHubClient({ tools }: { tools: ToolSummary[] }) {
                 <div style={{ fontSize: 11.5, color: "#93C5FD", fontWeight: 700 }}>
                   3 · FRONTERA ÍNDICES + DATOS OFICIALES SFC
                 </div>
-                <div style={{ fontSize: 14.5, fontWeight: 600 }}>12 categorías oficiales · Dataset qhpu-8ixx</div>
+                <div style={{ fontSize: 14.5, fontWeight: 600 }}>12 categorías cuantitativas · Fondos de Inversión en Colombia</div>
                 <div style={{ fontSize: 12.5, color: "var(--text-secondary)" }}>
                   Clasificación trimestral determinística y series oficiales con fecha de corte exacta.
                 </div>
@@ -811,8 +811,7 @@ export function FundsHubClient({ tools }: { tools: ToolSummary[] }) {
             Catálogo de {tools.length} herramientas institucionales en Funds Data MCP
           </h2>
           <p className="ff-sub">
-            Conectadas en tiempo real al dataset oficial <code className="ff-mono" style={{ color: "#7DD3FC" }}>qhpu-8ixx</code>{" "}
-            de la Superintendencia Financiera de Colombia en <code className="ff-mono">datos.gov.co</code>.
+            Conectadas en tiempo real con la información estructurada de los Fondos de Inversión en Colombia.
           </p>
 
           <div className="ff-grid-3">
