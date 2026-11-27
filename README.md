@@ -8,12 +8,12 @@ Frontera Funds Data MCP es la capa de acceso a datos. Expone información estruc
 
 ## Conexión de producción
 
-El nombre del repositorio y del servidor MCP se actualiza a `frontera-funds-data-mcp`. Por compatibilidad, el proyecto y dominio Vercel actuales se conservan durante esta reorganización:
+El nombre del repositorio y del servidor MCP se actualiza a `frontera-funds-data-mcp`. Las conexiones nuevas deben usar el dominio oficial; el proyecto Vercel conserva compatibilidad con conexiones anteriores:
 
-- Endpoint MCP: `https://mcp-sfc-fics-colombia.vercel.app/api/mcp`
-- Health / catálogo: `https://mcp-sfc-fics-colombia.vercel.app/api/mcp`
+- Endpoint MCP: `https://funds-data.fronteraeficiente.com/api/mcp`
+- Health / catálogo: `https://funds-data.fronteraeficiente.com/api/mcp`
 
-El dominio se podrá migrar en una fase posterior, con aliases y clientes coordinados.
+El dominio anterior de Vercel se conserva como compatibilidad; las conexiones nuevas deben usar el dominio oficial.
 
 ## Herramientas
 
@@ -36,7 +36,7 @@ Los esquemas y descripciones publicados por `tools/list` son el contrato vigente
 
 - Los datos provienen directamente de Socrata/datos.gov.co; el servidor no depende de Frontera Funds SaaS.
 - El endpoint MCP requiere OAuth 2.1 con Supabase Auth, con magic link por correo y consentimiento explícito del cliente.
-- El control de consumo reutiliza la cuota compartida de Frontera: 2.000 llamadas/mes y 50/minuto por usuario.
+- El plan gratuito incluye 1.500 créditos por mes calendario UTC y por MCP, compartidos entre los asistentes de la misma cuenta. Un crédito equivale a una llamada `tools/call` exitosa. Los errores de fuente no consumen créditos mensuales, pero cuentan dentro del límite Free de 30 intentos por minuto.
 - `x-socrata-app-token` es una credencial BYOK opcional del proveedor Socrata; no identifica al usuario ni reemplaza OAuth.
 - La metadata OAuth del recurso está disponible en `/api/mcp/oauth-protected-resource`.
 
@@ -55,16 +55,20 @@ npm start
 {
   "mcpServers": {
     "frontera-funds-data-mcp": {
-      "url": "https://mcp-sfc-fics-colombia.vercel.app/api/mcp"
+      "url": "https://funds-data.fronteraeficiente.com/api/mcp"
     }
   }
 }
 ```
 
-El nombre del repositorio y del servidor es `frontera-funds-data-mcp`. El dominio Vercel se conserva temporalmente para mantener compatibilidad con clientes existentes.
+El nombre del repositorio y del servidor es `frontera-funds-data-mcp`. El dominio oficial es funds-data.fronteraeficiente.com; el alias Vercel se conserva para conexiones existentes.
 
 ## Autenticación y consumo
 
-El endpoint requiere OAuth 2.1 con Supabase Auth, siguiendo el modelo de Frontera Open Data. El usuario inicia sesión por magic link y autoriza explícitamente el cliente MCP. Las cuotas son compartidas entre los MCP del mismo proyecto Supabase: 2.000 llamadas/mes y 50/minuto por usuario. Solo se cuentan operaciones `tools/call`.
+El endpoint requiere OAuth 2.1 con Supabase Auth, siguiendo el modelo de Frontera Open Data. El usuario inicia sesión por magic link y autoriza explícitamente el cliente MCP. La identidad Supabase es compartida; el consumo se separa por producto. El plan gratuito incluye 1.500 créditos por mes calendario UTC y por MCP, compartidos entre los asistentes de la misma cuenta. Un crédito equivale a una llamada `tools/call` exitosa. Los errores de fuente no consumen créditos mensuales, pero cuentan dentro del límite Free de 30 intentos por minuto.
 
 Consulta [`docs/AUTHENTICATION.md`](docs/AUTHENTICATION.md) para el flujo, endpoints, variables y límites. La credencial BYOK de Socrata es independiente de la identidad OAuth.
+
+## Planes individuales y contacto
+
+Free incluye 1.500 créditos al mes por MCP. Los planes de pago disponibles son Starter, Pro y Ultra, para una persona. La Suite también es individual y conserva una cuota por cada MCP. Para necesidades adicionales, escribe a [powerportfoliomanagament@gmail.com](mailto:powerportfoliomanagament@gmail.com). Los planes de equipo ya no están disponibles para nuevas compras.

@@ -35,8 +35,11 @@ function FundsMark({ size = 30 }: { size?: number }) {
   );
 }
 
-export default async function BillingPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
+export default async function BillingPage({ searchParams }: { searchParams: Promise<{ status?: string; scope?: string; cycle?: string; plan?: string }> }) {
   const params = await searchParams;
+  const initialScope = params?.scope === "suite" ? "suite" : "funds_data";
+  const initialCycle = params?.cycle === "1m" || params?.cycle === "12m" ? params.cycle : "6m";
+  const initialPlan = ["starter", "pro", "ultra"].includes(params?.plan ?? "") ? params?.plan : undefined;
   return (
     <main style={{ minHeight: "100vh", background: "#F8FAFC", color: "#0F172A", fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", padding: "36px 20px" }}>
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
@@ -48,18 +51,23 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
             </div>
             <div>
               <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: 19, lineHeight: 1.08, color: "#0B1F3B" }}>
-                Frontera <span style={{ color: "#1D63ED" }}>Funds</span>
+                Frontera <span style={{ color: "#1D63ED" }}>Funds Data MCP</span>
               </div>
               <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#64748B", marginTop: 2 }}>
-                Análisis y gestión de FIC
+                Créditos para consultas de datos públicos de FIC
               </div>
             </div>
           </div>
           <span style={{ padding: "6px 12px", borderRadius: 999, background: "#EFF6FF", color: "#1D4ED8", fontSize: 12, fontWeight: 600 }}>Cuota independiente · funds_data</span>
         </header>
-        <BillingClient status={params?.status} />
+        <BillingClient
+          status={params?.status}
+          initialScope={initialScope}
+          initialCycle={initialCycle}
+          initialPlan={initialPlan}
+        />
         <footer style={{ fontSize: 12, color: "#64748B", lineHeight: 1.6 }}>
-          Un producto de Frontera Eficiente. Tarifas en pesos colombianos (COP, tarifa plena sin IVA en etapa Persona Natural). Las cuotas se reinician el día 1 de cada mes (UTC). Soporte: powerportfoliomanagement@gmail.com.
+          Un producto de Frontera Eficiente. Tarifas en pesos colombianos (COP, tarifa plena sin IVA en etapa Persona Natural). Las cuotas se reinician el día 1 de cada mes (UTC). Soporte: powerportfoliomanagament@gmail.com.
         </footer>
       </div>
     </main>

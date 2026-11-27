@@ -18,7 +18,7 @@ const FUNDS_CONNECTOR_OAUTH = ["https://funds-connector", "fronteraeficiente", "
 const SAAS_APP_URL = ["https://app", "fronteraeficiente", "com"].join(".");
 const BRAND_HOME = ["https://www", "fronteraeficiente", "com"].join(".");
 const OPENDATA_URL = ["https://opendata", "fronteraeficiente", "com"].join(".");
-const CONTACT_EMAIL = ["powerportfoliomanagement", "gmail.com"].join("@");
+const CONTACT_EMAIL = ["powerportfoliomanagament", "gmail.com"].join("@");
 const FONTS_HREF =
   [
     "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700",
@@ -33,7 +33,7 @@ const CYCLE_LABELS: Record<BillingCycle, string> = {
 };
 
 const FUNDS_DATA_PLANS: Array<{
-  code: "starter" | "pro" | "ultra" | "team";
+  code: "starter" | "pro" | "ultra";
   label: string;
   monthlyLimit: number;
   perMinuteLimit: number;
@@ -56,7 +56,7 @@ const FUNDS_DATA_PLANS: Array<{
     perMinuteLimit: 90,
     pricesCop: { "1m": 49000, "6m": 245000, "12m": 392000 },
     featured: true,
-    description: "El más elegido · 15.000 consultas exitosas/mes · autoservicio completo.",
+    description: "1 usuario · El más elegido · 15.000 consultas exitosas/mes · autoservicio completo.",
   },
   {
     code: "ultra",
@@ -64,15 +64,7 @@ const FUNDS_DATA_PLANS: Array<{
     monthlyLimit: 50000,
     perMinuteLimit: 120,
     pricesCop: { "1m": 99000, "6m": 495000, "12m": 792000 },
-    description: "Power User · 50.000 consultas exitosas/mes · 1–2 usuarios · soporte por correo.",
-  },
-  {
-    code: "team",
-    label: "Mesa / Equipo",
-    monthlyLimit: 100000,
-    perMinuteLimit: 180,
-    pricesCop: { "1m": 179000, "6m": 895000, "12m": 1432000 },
-    description: "Hasta 5 puestos · 100.000 consultas exitosas/mes · fiduciarias y comités.",
+    description: "Power User · 50.000 consultas exitosas/mes · 1 usuario · soporte por correo.",
   },
 ];
 
@@ -99,7 +91,7 @@ const FIVE_PILLARS = [
     badge: "Incluido en Frontera Funds SaaS",
     desc: "Servidor MCP autenticado vía OAuth 2.1 que conecta a Claude, ChatGPT o tu agente directamente con tus grupos, favoritos y seguimiento dentro de la SaaS sin tocar ni exponer credenciales manuales.",
     bullets: [
-      "Lectura y gestión de favoritos y grupos de tu cuenta",
+      "Lectura de favoritos y grupos; gestión sujeta a habilitación de permisos",
       "Autenticación OAuth 2.1 con tu sesión de la SaaS",
       "Sincronización directa con tu trabajo en pantalla",
     ],
@@ -111,12 +103,12 @@ const FIVE_PILLARS = [
     num: "03",
     tag: "MCP PÚBLICO · DATOS SFC",
     title: "Frontera Funds Data MCP",
-    badge: "Gratis 1.500/mes · Planes desde $29.000",
+    badge: "Gratis 1.500 créditos/mes · Planes desde $29.000",
     desc: "Servidor MCP independiente conectado con la información de los Fondos de Inversión en Colombia, con 12 herramientas cuantitativas e institucionales.",
     bullets: [
       "Rentabilidades E.A., AUM, cuota de mercado y flujos netos",
       "Radar de liquidez, riesgo cuantitativo y peer groups",
-      "1.500 consultas exitosas/mes gratis sin tarjeta",
+      "1.500 créditos al mes gratis por MCP sin tarjeta",
     ],
     ctaLabel: "Explorar 12 herramientas →",
     ctaHref: "#herramientas",
@@ -124,13 +116,13 @@ const FIVE_PILLARS = [
   },
   {
     num: "04",
-    tag: "CLASIFICACIÓN · 12 CATEGORÍAS",
+    tag: "CLASIFICACIÓN · METODOLOGÍA FRONTERA",
     title: "Frontera Índices",
-    badge: "Incluido en SaaS · Licenciamiento corporativo",
-    desc: "Motor determinístico de categorización cuantitativa y por naturaleza de FIC colombianos sobre datos oficiales SFC, con 12 categorías claras, ventana móvil de 365 días y mínimo de 180 observaciones.",
+    badge: "Incluido en SaaS · Consultas adicionales por correo",
+    desc: "Metodología propia de Frontera basada en datos oficiales SFC: 12 grupos de volatilidad para fondos tradicionales con más de 180 retornos válidos, tres categorías por naturaleza y el estado Sin Clasificar. Ventana móvil de 365 días.",
     bullets: [
       "Metodología auditable y actualización trimestral verificable",
-      "Cero cajas negras: fondos sin historial van a «Por clasificar»",
+      "Los fondos especiales se clasifican por naturaleza sin exigir historial",
       "Disponible en feeds CSV/JSON a medida para entidades",
     ],
     ctaLabel: "Consultar licenciamiento →",
@@ -141,8 +133,8 @@ const FIVE_PILLARS = [
     num: "05",
     tag: "AUTOMATIZACIÓN · REPORTES HTML",
     title: "Intelligence Skills",
-    badge: "Incluido en SaaS · A medida para equipos",
-    desc: "Skills financieras reproducibles que permiten a tu asistente de IA producir factsheets individuales y comparativos ejecutivos en HTML replicando cálculos, tipografía y gráficas validadas en la SaaS.",
+    badge: "Incluido en SaaS · Consultas adicionales por correo",
+    desc: "Skills financieras que producen informes HTML determinísticos basados en perfiles de referencia de la SaaS. La homologación visual y numérica completa sigue en curso.",
     bullets: [
       "Factsheets y comparativos listos para comité de inversión",
       "Integración nativa con Funds Data MCP y Connector",
@@ -225,7 +217,7 @@ function getClientGuides(target: McpTarget) {
   const serverKey = target === "funds_data" ? "frontera-funds-data" : "frontera-funds-connector";
   const authNote =
     target === "funds_data"
-      ? "Entras con tu correo mediante OAuth 2.1 y activas tus 1.500 consultas exitosas/mes gratis sin tarjeta."
+      ? "Entras con tu correo mediante OAuth 2.1 y activas tus 1.500 créditos al mes gratis por MCP sin tarjeta."
       : "Inicias sesión con tu cuenta activa de Frontera Funds SaaS (OAuth 2.1) para operar tus favoritos y grupos.";
 
   const guides: Record<
@@ -393,7 +385,7 @@ export function FundsHubClient({ tools }: { tools: ToolSummary[] }) {
         .ff-h2 { font-size:clamp(26px,3.5vw,38px); font-weight:800; line-height:1.12; margin:0 0 14px; max-width:780px; }
         .ff-sub { font-size:16px; color:var(--text-secondary); max-width:700px; margin:0 0 36px; }
         .ff-grid-3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; }
-        .ff-grid-4 { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px; }
+        .ff-plan-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
         .ff-feature-card { border-radius:18px; padding:22px; background:var(--bg-card); border:1px solid var(--border-subtle); display:flex; flex-direction:column; justify-content:space-between; gap:16px; }
         .ff-feature-card.highlight { border-color:rgba(56,189,248,.42); background:linear-gradient(165deg,rgba(13,30,68,.92),rgba(7,15,36,.95)); }
         .ff-badge { display:inline-block; font-size:11px; font-weight:600; padding:4px 10px; border-radius:999px; background:rgba(29,99,237,.16); border:1px solid rgba(56,189,248,.28); color:#BAE6FD; margin-bottom:10px; }
@@ -419,11 +411,11 @@ export function FundsHubClient({ tools }: { tools: ToolSummary[] }) {
         @media (max-width:980px) {
           .ff-hero-grid,.ff-guide-box,.ff-saas-banner { grid-template-columns:1fr; }
           .ff-grid-3 { grid-template-columns:1fr; }
-          .ff-grid-4 { grid-template-columns:repeat(2,minmax(0,1fr)); }
+          .ff-plan-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
           .ff-nav-links { display:none; }
         }
         @media (max-width:600px) {
-          .ff-grid-4 { grid-template-columns:1fr; }
+          .ff-plan-grid { grid-template-columns:1fr; }
         }
       `}</style>
 
@@ -643,7 +635,7 @@ export function FundsHubClient({ tools }: { tools: ToolSummary[] }) {
                     color: "#A7F3D0",
                   }}
                 >
-                  Suite Modular · Ahorro del 20%
+                  Suite Modular · Ahorro de al menos 20%
                 </span>
                 <p style={{ fontSize: 13.5, color: "var(--text-secondary)", margin: "0 0 14px" }}>
                   Cruza los datos oficiales de FICs de la SFC con TRM, tasas BanRep, IPC DANE, SECOP II y normativa
@@ -665,8 +657,8 @@ export function FundsHubClient({ tools }: { tools: ToolSummary[] }) {
                 </ul>
               </div>
               <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-                <a href="/billing" style={{ color: "#05FACE", fontWeight: 700, fontSize: 13.5, textDecoration: "none" }}>
-                  Ver Suite (-20%) →
+                <a href={`/billing?scope=suite&cycle=${cycle}`} style={{ color: "#05FACE", fontWeight: 700, fontSize: 13.5, textDecoration: "none" }}>
+                  Ver Suite (ahorro de al menos 20%) →
                 </a>
                 <a
                   href={OPENDATA_URL}
@@ -787,7 +779,7 @@ export function FundsHubClient({ tools }: { tools: ToolSummary[] }) {
               >
                 <span>
                   {mcpTarget === "funds_data"
-                    ? "Empieza con 1.500 consultas exitosas/mes gratis en Funds Data MCP."
+                    ? "Empieza con 1.500 créditos al mes gratis por MCP en Funds Data MCP."
                     : "El Connector requiere una cuenta activa en Frontera Funds SaaS."}
                 </span>
                 <a
@@ -845,7 +837,7 @@ export function FundsHubClient({ tools }: { tools: ToolSummary[] }) {
       <section id="planes" className="ff-section">
         <div className="ff-container">
           <div className="ff-eyebrow">04 · Planes y precios en COP</div>
-          <h2 className="ff-h2 ff-display">Elige la plataforma SaaS integral o escala tus consultas MCP</h2>
+          <h2 className="ff-h2 ff-display">Planes individuales para la plataforma SaaS y tus consultas MCP</h2>
           <p className="ff-sub">
             Precios transparentes en pesos colombianos (COP). Sin contratos ocultos: activa la experiencia completa en{" "}
             <strong>Frontera Funds SaaS</strong> o paga únicamente por el volumen de consultas de{" "}
@@ -868,7 +860,7 @@ export function FundsHubClient({ tools }: { tools: ToolSummary[] }) {
                 {[
                   "Plataforma SaaS en app.fronteraeficiente.com",
                   "Frontera Funds Connector MCP (OAuth 2.1)",
-                  "Frontera Índices (12 categorías oficiales)",
+                  "Frontera Índices (metodología propia sobre datos SFC)",
                   "Intelligence Skills (factsheets y comparativos HTML)",
                 ].map((feat) => (
                   <div key={feat} style={{ fontSize: 13.5, color: "#E2E8F0" }}>
@@ -915,7 +907,7 @@ export function FundsHubClient({ tools }: { tools: ToolSummary[] }) {
                 className="ff-btn ff-btn-ghost"
                 style={{ width: "100%" }}
               >
-                Activar o cotizar puestos
+                Consultar necesidades adicionales
               </a>
             </div>
           </div>
@@ -925,11 +917,15 @@ export function FundsHubClient({ tools }: { tools: ToolSummary[] }) {
               Frontera Funds Data MCP · Planes independientes por cuota
             </h3>
             <p style={{ fontSize: 14.5, color: "var(--text-secondary)", margin: "0 0 18px" }}>
-              Arranca gratis con <strong>1.500 consultas exitosas/mes ($0 COP)</strong> sin tarjeta. Amplía tu cuota con
-              pago único en COP vía Mercado Pago (sin renovaciones forzosas).
+              Arranca gratis con <strong>1.500 créditos al mes por MCP ($0 COP)</strong> sin tarjeta. Amplía tu cuota con
+              pago único en COP vía Mercado Pago (sin renovaciones forzosas). Un crédito equivale a una llamada de herramienta exitosa; los errores de fuente no consumen créditos mensuales. El límite Free es de 30 intentos por minuto, incluidos los errores.
             </p>
           </div>
 
+          <p style={{ fontSize: 14, color: "var(--text-secondary)", marginBottom: 18 }}>
+            Todos los planes son individuales, para una persona. ¿Necesitas algo adicional?{" "}
+            <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: "#7DD3FC" }}>{CONTACT_EMAIL}</a>.
+          </p>
           <div className="ff-cycle-switch" role="group" aria-label="Ciclo de facturación Funds Data MCP">
             {(["1m", "6m", "12m"] as BillingCycle[]).map((c) => (
               <button
@@ -943,7 +939,7 @@ export function FundsHubClient({ tools }: { tools: ToolSummary[] }) {
             ))}
           </div>
 
-          <div className="ff-grid-4 ff-tabular">
+          <div className="ff-plan-grid ff-tabular">
             {FUNDS_DATA_PLANS.map((plan) => (
               <div key={plan.code} className={`ff-plan-card ${plan.featured ? "featured" : ""}`}>
                 <div>
@@ -982,11 +978,11 @@ export function FundsHubClient({ tools }: { tools: ToolSummary[] }) {
                   <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: 0 }}>{plan.description}</p>
                 </div>
                 <a
-                  href="/billing"
+                  href={`/billing?scope=funds_data&plan=${plan.code}&cycle=${cycle}`}
                   className={`ff-btn ${plan.featured ? "ff-btn-primary" : "ff-btn-ghost"}`}
                   style={{ width: "100%" }}
                 >
-                  Seleccionar en /billing →
+                  Elegir plan →
                 </a>
               </div>
             ))}
@@ -1009,7 +1005,7 @@ export function FundsHubClient({ tools }: { tools: ToolSummary[] }) {
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <UmbrellaLogoMark size={28} idPrefix="feSuite" />
               <div style={{ fontSize: 13.5, color: "var(--text-secondary)" }}>
-                <strong style={{ color: "#F8FAFC" }}>Frontera Eficiente · Paquete Combinado (-20%):</strong> combina{" "}
+                <strong style={{ color: "#F8FAFC" }}>Frontera Eficiente · Paquete Combinado (ahorro de al menos 20%):</strong> combina{" "}
                 <strong>Frontera OpenData MCP + Frontera Funds Data MCP</strong> desde{" "}
                 <strong className="ff-tabular" style={{ color: "#05FACE" }}>
                   $43.000 COP/mes
@@ -1017,8 +1013,8 @@ export function FundsHubClient({ tools }: { tools: ToolSummary[] }) {
                 con cuotas independientes por cada servidor.
               </div>
             </div>
-            <a href="/billing" style={{ color: "#05FACE", fontWeight: 700, fontSize: 13.5, textDecoration: "none", whiteSpace: "nowrap" }}>
-              Ver combo en /billing →
+            <a href={`/billing?scope=suite&cycle=${cycle}`} style={{ color: "#05FACE", fontWeight: 700, fontSize: 13.5, textDecoration: "none", whiteSpace: "nowrap" }}>
+              Ver planes combinados →
             </a>
           </div>
 

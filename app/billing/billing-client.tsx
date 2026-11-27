@@ -6,7 +6,7 @@ type Cycle = "1m" | "6m" | "12m";
 type Scope = "funds_data" | "suite";
 
 const CHECKOUT_ENDPOINT = "https://opendata.fronteraeficiente.com/api/billing/checkout";
-const CONTACT_EMAIL = "powerportfoliomanagement@gmail.com";
+const CONTACT_EMAIL = "powerportfoliomanagament@gmail.com";
 
 const PALETTE = {
   opendata: {
@@ -64,18 +64,16 @@ const CYCLES: Array<{ id: Cycle; label: string; badge?: string }> = [
   { id: "12m", label: "1 año", badge: "4 meses gratis" },
 ];
 
-const PLANS: Record<Scope, Array<{ code: "starter" | "pro" | "ultra" | "team"; name: string; quota: string; rate: string; prices: Record<Cycle, number>; featured?: boolean; note: string }>> = {
+const PLANS: Record<Scope, Array<{ code: "starter" | "pro" | "ultra"; name: string; quota: string; rate: string; prices: Record<Cycle, number>; featured?: boolean; note: string }>> = {
   funds_data: [
     { code: "starter", name: "Starter / Analista", quota: "5.000 exitosas / mes", rate: "60/min", prices: { "1m": 29000, "6m": 145000, "12m": 232000 }, note: "1 usuario · 12 herramientas de análisis de fondos." },
-    { code: "pro", name: "Pro", quota: "15.000 exitosas / mes", rate: "90/min", prices: { "1m": 49000, "6m": 245000, "12m": 392000 }, featured: true, note: "El más elegido · autoservicio completo." },
-    { code: "ultra", name: "Ultra", quota: "50.000 exitosas / mes", rate: "120/min", prices: { "1m": 99000, "6m": 495000, "12m": 792000 }, note: "Power User · 1–2 usuarios · soporte por correo." },
-    { code: "team", name: "Mesa / Equipo", quota: "100.000 exitosas / mes", rate: "180/min", prices: { "1m": 179000, "6m": 895000, "12m": 1432000 }, note: "Hasta 5 puestos · fiduciarias y comités." },
+    { code: "pro", name: "Pro", quota: "15.000 exitosas / mes", rate: "90/min", prices: { "1m": 49000, "6m": 245000, "12m": 392000 }, featured: true, note: "1 usuario · El más elegido · autoservicio completo." },
+    { code: "ultra", name: "Ultra", quota: "50.000 exitosas / mes", rate: "120/min", prices: { "1m": 99000, "6m": 495000, "12m": 792000 }, note: "Power User · 1 usuario · soporte por correo." },
   ],
   suite: [
-    { code: "starter", name: "Combo Starter", quota: "5.000 / mes por MCP", rate: "60/min", prices: { "1m": 43000, "6m": 215000, "12m": 344000 }, note: "Frontera OpenData + Frontera Funds Data (-20%)." },
-    { code: "pro", name: "Combo Pro", quota: "15.000 / mes por MCP", rate: "90/min", prices: { "1m": 69000, "6m": 345000, "12m": 552000 }, featured: true, note: "Frontera OpenData + Frontera Funds Data (-21%)." },
-    { code: "ultra", name: "Combo Ultra", quota: "50.000 / mes por MCP", rate: "120/min", prices: { "1m": 142000, "6m": 710000, "12m": 1136000 }, note: "Frontera OpenData + Frontera Funds Data (-20%)." },
-    { code: "team", name: "Combo Empresa / Mesa", quota: "100.000 / mes por MCP", rate: "180/min", prices: { "1m": 259000, "6m": 1295000, "12m": 2072000 }, note: "Hasta 5 puestos en ambos MCPs (-20%)." },
+    { code: "starter", name: "Combo Starter", quota: "5.000 / mes por MCP", rate: "60/min", prices: { "1m": 43000, "6m": 215000, "12m": 344000 }, note: "1 usuario · Frontera OpenData + Frontera Funds Data (ahorro de al menos 20%)." },
+    { code: "pro", name: "Combo Pro", quota: "15.000 / mes por MCP", rate: "90/min", prices: { "1m": 69000, "6m": 345000, "12m": 552000 }, featured: true, note: "1 usuario · Frontera OpenData + Frontera Funds Data (ahorro de al menos 20%)." },
+    { code: "ultra", name: "Combo Ultra", quota: "50.000 / mes por MCP", rate: "120/min", prices: { "1m": 142000, "6m": 710000, "12m": 1136000 }, note: "1 usuario · Frontera OpenData + Frontera Funds Data (ahorro de al menos 20%)." },
   ],
 };
 
@@ -83,9 +81,9 @@ function fmtCop(v: number) {
   return `$${v.toLocaleString("es-CO")} COP`;
 }
 
-export function BillingClient({ status }: { status?: string }) {
-  const [scope, setScope] = useState<Scope>("funds_data");
-  const [cycle, setCycle] = useState<Cycle>("6m");
+export function BillingClient({ status, initialScope = "funds_data", initialCycle = "6m", initialPlan }: { status?: string; initialScope?: Scope; initialCycle?: Cycle; initialPlan?: string }) {
+  const [scope, setScope] = useState<Scope>(initialScope);
+  const [cycle, setCycle] = useState<Cycle>(initialCycle);
   const [email, setEmail] = useState("");
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -119,13 +117,13 @@ export function BillingClient({ status }: { status?: string }) {
   return (
     <div>
       {status === "approved" && (
-        <div style={{ marginBottom: 20, padding: "14px 18px", borderRadius: 12, background: "#ECFDF5", border: "1px solid #A7F3D0", color: "#065F46", fontSize: 14, fontWeight: 600 }}>
-          Pago aprobado. Tu cuota mensual se actualizará automáticamente en segundos.
+        <div style={{ marginBottom: 20, padding: "14px 18px", borderRadius: 12, background: "#EFF6FF", border: "1px solid #BFDBFE", color: "#1E40AF", fontSize: 14, fontWeight: 600 }}>
+          Regresaste del proceso de pago. Este regreso no confirma la transacción: tu plan se activa cuando Mercado Pago confirme el pago.
         </div>
       )}
       {status === "pending" && (
         <div style={{ marginBottom: 20, padding: "14px 18px", borderRadius: 12, background: "#FFFBEB", border: "1px solid #FDE68A", color: "#92400E", fontSize: 14, fontWeight: 600 }}>
-          Pago pendiente de confirmación. Apenas Mercado Pago lo apruebe, activaremos tu cuota automáticamente.
+          Esperamos la confirmación de Mercado Pago. Si la transacción es aprobada, activaremos tu plan.
         </div>
       )}
       {status === "failure" && (
@@ -142,11 +140,11 @@ export function BillingClient({ status }: { status?: string }) {
               {scope === "suite" ? (
                 <>Frontera Eficiente · <span style={{ color: "#01E99F" }}>Paquete OpenData + Funds</span></>
               ) : (
-                <>Frontera <span style={{ color: "#0084FF" }}>Funds</span></>
+                <>Frontera <span style={{ color: "#0084FF" }}>Funds Data MCP</span></>
               )}
             </div>
             <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#94A3B8" }}>
-              {scope === "suite" ? "Inteligencia financiera en acción · Ahorro 20%" : "Análisis y gestión de FIC · Checkout COP"}
+              {scope === "suite" ? "Inteligencia financiera en acción · Ahorro de al menos 20%" : "Datos públicos de FIC · Checkout COP"}
             </div>
           </div>
         </div>
@@ -154,7 +152,7 @@ export function BillingClient({ status }: { status?: string }) {
           Amplía tu cuota con pago único en COP
         </h1>
         <p style={{ margin: "0 0 18px", fontSize: 14, lineHeight: 1.6, color: "#CBD5E1" }}>
-          Sin suscripciones forzosas (Tarjeta, PSE o efectivo vía Mercado Pago). Tu plan Free incluye 1.500 consultas exitosas/mes y los errores de fuente nunca descuentan cuota.
+          Sin suscripciones forzosas (Tarjeta, PSE o efectivo vía Mercado Pago). Tu plan Free incluye 1.500 créditos al mes por MCP, compartidos entre tus asistentes. Un crédito equivale a una llamada de herramienta exitosa; los errores de fuente no consumen créditos mensuales. El límite Free de 30 intentos por minuto también incluye los errores.
         </p>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
           <input
@@ -171,10 +169,10 @@ export function BillingClient({ status }: { status?: string }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
         <div style={{ display: "inline-flex", background: "#E2E8F0", padding: 4, borderRadius: 10, gap: 4 }}>
           <button type="button" onClick={() => setScope("funds_data")} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 14px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, background: scope === "funds_data" ? "#021230" : "transparent", color: scope === "funds_data" ? "#FFFFFF" : "#334155" }}>
-            <BrandMark variant="funds_data" size={18} /> Solo Frontera Funds
+            <BrandMark variant="funds_data" size={18} /> Solo Frontera Funds Data MCP
           </button>
           <button type="button" onClick={() => setScope("suite")} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 14px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, background: scope === "suite" ? "#021230" : "transparent", color: scope === "suite" ? "#FFFFFF" : "#334155" }}>
-            <BrandMark variant="suite" size={18} /> OpenData + Funds (-20%)
+            <BrandMark variant="suite" size={18} /> OpenData + Funds (ahorra al menos 20%)
           </button>
         </div>
 
@@ -196,7 +194,7 @@ export function BillingClient({ status }: { status?: string }) {
                   <div style={{ width: 30, height: 30, borderRadius: 8, background: "#021230", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <BrandMark variant={scope} size={18} />
                   </div>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: plan.featured ? "#1D4ED8" : "#475569" }}>{plan.name}</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: plan.featured ? "#1D4ED8" : "#475569" }}>{plan.name}{scope === initialScope && plan.code === initialPlan ? " · Seleccionado" : ""}</span>
                 </div>
                 {plan.featured && <span style={{ fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 999, background: "#EFF6FF", color: "#1D4ED8" }}>DESTACADO</span>}
               </div>
@@ -217,6 +215,10 @@ export function BillingClient({ status }: { status?: string }) {
           </div>
         ))}
       </section>
+      <p style={{ fontSize: 14, lineHeight: 1.6, color: "#475569" }}>
+        Todos los planes son individuales, para una persona. ¿Necesitas algo adicional?{" "}
+        <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+      </p>
     </div>
   );
 }
