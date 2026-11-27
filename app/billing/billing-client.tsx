@@ -6,7 +6,7 @@ type Cycle = "1m" | "6m" | "12m";
 type Scope = "funds_data" | "suite";
 
 const CHECKOUT_ENDPOINT = "https://opendata.fronteraeficiente.com/api/billing/checkout";
-const CONTACT_EMAIL = "powerportfoliomanagament@gmail.com";
+const CONTACT_EMAIL = "powerportfoliomanagement@gmail.com";
 
 const PALETTE = {
   opendata: {

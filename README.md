@@ -71,4 +71,4 @@ Consulta [`docs/AUTHENTICATION.md`](docs/AUTHENTICATION.md) para el flujo, endpo
 
 ## Planes individuales y contacto
 
-Free incluye 1.500 créditos al mes por MCP. Los planes de pago disponibles son Starter, Pro y Ultra, para una persona. La Suite también es individual y conserva una cuota por cada MCP. Para necesidades adicionales, escribe a [powerportfoliomanagament@gmail.com](mailto:powerportfoliomanagament@gmail.com). Los planes de equipo ya no están disponibles para nuevas compras.
+Free incluye 1.500 créditos al mes por MCP. Los planes de pago disponibles son Starter, Pro y Ultra, para una persona. La Suite también es individual y conserva una cuota por cada MCP. Para necesidades adicionales, escribe a [powerportfoliomanagement@gmail.com](mailto:powerportfoliomanagement@gmail.com). Los planes de equipo ya no están disponibles para nuevas compras.

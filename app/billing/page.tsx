@@ -67,7 +67,7 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
           initialPlan={initialPlan}
         />
         <footer style={{ fontSize: 12, color: "#64748B", lineHeight: 1.6 }}>
-          Un producto de Frontera Eficiente. Tarifas en pesos colombianos (COP, tarifa plena sin IVA en etapa Persona Natural). Las cuotas se reinician el día 1 de cada mes (UTC). Soporte: powerportfoliomanagament@gmail.com.
+          Un producto de Frontera Eficiente. Tarifas en pesos colombianos (COP, tarifa plena sin IVA en etapa Persona Natural). Las cuotas se reinician el día 1 de cada mes (UTC). Soporte: powerportfoliomanagement@gmail.com.
         </footer>
       </div>
     </main>

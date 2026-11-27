@@ -18,7 +18,7 @@ const FUNDS_CONNECTOR_OAUTH = ["https://funds-connector", "fronteraeficiente", "
 const SAAS_APP_URL = ["https://app", "fronteraeficiente", "com"].join(".");
 const BRAND_HOME = ["https://www", "fronteraeficiente", "com"].join(".");
 const OPENDATA_URL = ["https://opendata", "fronteraeficiente", "com"].join(".");
-const CONTACT_EMAIL = ["powerportfoliomanagament", "gmail.com"].join("@");
+const CONTACT_EMAIL = ["powerportfoliomanagement", "gmail.com"].join("@");
 const FONTS_HREF =
   [
     "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700",

@@ -158,11 +158,11 @@ async function checkToolQuota(request: Request): Promise<QuotaCheckOutcome> {
     await triggerLifecycleEmail({ userId, eventType: "quota_100", monthlyUsed: quota.monthly_used ?? monthlyLimit, monthlyLimit, planCode, resetDate });
   }
   const message = isMonthly
-    ? `Alcanzaste el límite mensual de ${monthlyLimit.toLocaleString("es-CO")} consultas exitosas de Frontera Funds Data MCP (${planCode}). Tu cuota es independiente de otros productos y se restablece el ${resetDate}. Consulta los planes disponibles o escríbenos a powerportfoliomanagament@gmail.com o revisa ${billingUrl}.`
+    ? `Alcanzaste el límite mensual de ${monthlyLimit.toLocaleString("es-CO")} consultas exitosas de Frontera Funds Data MCP (${planCode}). Tu cuota es independiente de otros productos y se restablece el ${resetDate}. Consulta los planes disponibles o escríbenos a powerportfoliomanagement@gmail.com o revisa ${billingUrl}.`
     : `Alcanzaste el límite de velocidad de ${perMinuteLimit} consultas por minuto de Frontera Funds Data MCP. Espera ${retryAfter} segundos y vuelve a intentarlo.`;
   return {
     blockedResponse: Response.json(
-      { jsonrpc: "2.0", id: rpcId, error: { code: isMonthly ? -32002 : -32029, message, data: { status: "quota_exceeded", reason: quota.reason ?? "per_minute", http_status: httpStatus, product_key: PRODUCT_KEY, plan_code: planCode, monthly_used: quota.monthly_used ?? 0, monthly_limit: monthlyLimit, minute_used: quota.minute_used ?? 0, per_minute_limit: perMinuteLimit, retry_after_seconds: retryAfter, monthly_reset: resetDate, billing_url: billingUrl, contact: "powerportfoliomanagament@gmail.com" } } },
+      { jsonrpc: "2.0", id: rpcId, error: { code: isMonthly ? -32002 : -32029, message, data: { status: "quota_exceeded", reason: quota.reason ?? "per_minute", http_status: httpStatus, product_key: PRODUCT_KEY, plan_code: planCode, monthly_used: quota.monthly_used ?? 0, monthly_limit: monthlyLimit, minute_used: quota.minute_used ?? 0, per_minute_limit: perMinuteLimit, retry_after_seconds: retryAfter, monthly_reset: resetDate, billing_url: billingUrl, contact: "powerportfoliomanagement@gmail.com" } } },
       { status: httpStatus, headers: { "Retry-After": String(retryAfter), "X-MCP-Quota-Status": "exceeded", "X-MCP-Product-Key": PRODUCT_KEY } }
     ),
     quotaContext: null
